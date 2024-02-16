@@ -24,6 +24,11 @@ async function standardAuth(req, res, next) {
     } else {
         next()
     }
+
+// ------------------> DELETE TO HERE AND UNCOMMENT THE REST
+
+
+
     /*
     if (!authorization) {
         res.status(401);

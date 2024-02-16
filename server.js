@@ -1,11 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+
+const morgan = require('morgan');
+
 const authRouter = require('./routers/auth.route');
 const { standardAuth } = require('./middleware/auth.middleware')
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(morgan('tiny'));
 
 app.use('/auth', authRouter);
 
