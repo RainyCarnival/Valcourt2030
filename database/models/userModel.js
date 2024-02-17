@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+/**
+ * Mongoose schema for representing users.
+ * 
+ * @typedef {Object} UserSchema
+ * @property {string} firstName - The first name of the user (required).
+ * @property {string} lastName - The last name of the user (required).
+ * @property {string} email - The email of the user (required, unique).
+ * @property {string} password - The password of the user (required, minlength: 8).
+ * @property {string} municipality - The municipality of the user.
+ * @property {mongoos.Schema.Types.ObjectId} interestedTags - A list of interested tags of the user (ref: Tags). 
+ */
 const UserSchema = new mongoose.Schema({
     firstName: {
         type: String,
