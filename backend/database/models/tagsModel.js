@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 /**
  * Mongoose schema for representing the list of tags.
@@ -7,10 +7,10 @@ const mongoose = require("mongoose");
  * @property {string} tag - A tag that is linked to an event (required).
  */
 const TagSchema = new mongoose.Schema({
-    tag: {
-        type: String,
-        required: true
-    }
+	tag: {
+		type: String,
+		required: true
+	}
 });
 
-module.exports = mongoose.model("Tags", TagSchema)
+module.exports = mongoose.model('Tags', TagSchema);
