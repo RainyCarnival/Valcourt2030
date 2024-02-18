@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 require("dotenv").config();
 
+/**
+ * Method to connect to the MongoDB database.
+ * 
+ * @returns Returns false if the MONGO_URL and DATABASE are not specified.
+ */
 async function connectToDatabase() {
     try {
-        // Replace 'your_database_uri' with the actual URI of your MongoDB database, including the database name
-        const databaseUri = process.env.MONGO_URL + process.env.DATABASE;
-
         const db = mongoose.connection;
         
         db.on('error', (error) => {
@@ -20,6 +22,18 @@ async function connectToDatabase() {
         process.on('SIGINT', () => {
             db.close();
         });
+
+        if(!process.env.MONGO_URL){
+            console.log('No MONGO_URL set in the .env file.')
+            return false
+        }
+
+        if(!process.env.DATABASE){
+            console.log('No DATABASE set in the .env file.')
+            return false
+        }
+
+        const databaseUri = process.env.MONGO_URL + process.env.DATABASE;
 
         await mongoose.connect(databaseUri);
         
