@@ -38,7 +38,7 @@ module.exports = {
 		/* Best practices */
 		// 'no-console': 'off',
 		'no-unused-vars': 'warn',
-		'no-undef': 'warn',
+		'no-undef': 'error',
 
 		/* ES6 and module rules */
 		'prefer-const': 'error',
