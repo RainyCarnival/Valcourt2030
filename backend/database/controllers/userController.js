@@ -35,7 +35,7 @@ async function registerUser(userInfo) {
 			return false;
 		}
 
-		if(!Array.isArray(userInfo.interestedTags)){
+		if(userInfo.interestedTags && !Array.isArray(userInfo.interestedTags)){
 			console.log('interestedTags must be an array: ', userInfo.interestedTags);
 			return false;
 		}
