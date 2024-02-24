@@ -97,4 +97,9 @@ async function loginUser(email, password) {
 	}
 }
 
+// TODO: Create a function to update the users
+// TODO: Create a function to delete a user
+// TODO: Create a function to create a user as an admin
+// TODO: Create a function to get all the users from the database.
+
 module.exports = { isEmailUnique, registerUser, loginUser };
