@@ -24,7 +24,7 @@ export default function SignUpPage() {
     const handleSubmit = (event) => {
     event.preventDefault(); // Prevent default form submission
 
-    // Check if all fields are filled and terms are accepted
+    // Basic check if all fields are filled and terms are accepted. To be improved.
     if (firstName && lastName && municipality !== 'Municipalité' && email && password && password === passwordRepeat && termsAccepted) {
       navigate('/signupInterest');
     } else {
