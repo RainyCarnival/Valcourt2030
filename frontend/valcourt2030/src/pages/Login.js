@@ -6,7 +6,7 @@ import Background from '../components/Background';
 
 export default function LoginPage() {
   return (
-    <Container className="d-flex justify-content-center align-items-center" style={{position: 'relative', height: "100vh" }}>
+    <Container className="d-flex justify-content-center align-items-center" style={{position: 'relative', height: "100vh"}}>
       <Background/>
       <Card style={{ width: '300px', backgroundColor: 'rgba(255, 255, 255, 0.5)', boxShadow: '0px 0px 10px rgba(0,0,0,0.1)' }}>
         <Card.Body>
