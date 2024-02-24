@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Card, Button, ButtonGroup, ToggleButton } from 'react-bootstrap';
 import logo from '../logo.png'; // Ensure the logo path is correct
@@ -7,6 +8,15 @@ import Background from '../components/Background';
 export default function SignUpInterestPage() {
   const [selectedInterests, setSelectedInterests] = useState([]);
 
+  const navigate = useNavigate();
+
+  const handleSubmit = (event) => {
+    navigate('/login');
+  }
+
+  const handlePrevious = () => {
+    navigate('/signup');
+  }
   const interests = [
     { name: 'Sport', value: 'sport' },
     { name: 'Integration', value: 'integration' },
@@ -63,10 +73,10 @@ export default function SignUpInterestPage() {
             ))}
           </ButtonGroup>
           <div className="d-grid gap-2 mt-4">
-            <Button style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }} type="submit">
+            <Button style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }} type="submit" onClick={handleSubmit}>
             Enregistrer
             </Button>
-            <Button variant="secondary" type="button">
+            <Button variant="secondary" type="button" onClick={handlePrevious}>
             Précédent
             </Button>
 

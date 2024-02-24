@@ -1,10 +1,24 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png';
 import Background from '../components/Background';
 
 export default function LoginPage() {
+
+  const navigate = useNavigate(); // Hook for navigation
+  
+  const handleLogin = () => {
+    //Todo: Add login logic
+    //Need to add a check for the user's credentials
+    navigate('/userEvent');
+  }
+
+  const handleSignUpClick = () => {
+    navigate('/signup'); // Navigate to the signup page
+  };
+
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{position: 'relative', height: "100vh"}}>
       <Background/>
@@ -12,9 +26,9 @@ export default function LoginPage() {
         <Card.Body>
           <Card.Title className="text-center mb-4">
             <img
-              src={logo} // Replace with your logo path
+              src={logo}
               alt="Logo"
-              style={{ width: '200px' }} // Adjust size as needed
+              style={{ width: '200px' }} 
             />
           </Card.Title>
           <Form>
@@ -30,10 +44,11 @@ export default function LoginPage() {
               style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }} 
               type="submit" 
               className="w-100 mb-2"
+              onClick={handleLogin}
             >
               Se connecter
             </Button>
-            <Button variant="secondary" className="w-100">
+            <Button variant="secondary" className="w-100" onClick={handleSignUpClick}>
               Inscription
             </Button>
           </Form>

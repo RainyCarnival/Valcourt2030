@@ -1,10 +1,38 @@
-import React from 'react';
+import React, {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Form, Button, Card, Dropdown } from 'react-bootstrap';
+import { Container, Form, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png'; // Ensure the logo path is correct
 import Background from '../components/Background';
 
 export default function SignUpPage() {
+
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [municipality, setMunicipality] = useState('Municipalité');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordRepeat, setPasswordRepeat] = useState('');
+    const [termsAccepted, setTermsAccepted] = useState(false);
+
+    const navigate = useNavigate();
+    
+    const handlePrevious = () => {
+      navigate('/login');
+    }
+
+    const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent default form submission
+
+    // Check if all fields are filled and terms are accepted
+    if (firstName && lastName && municipality !== 'Municipalité' && email && password && password === passwordRepeat && termsAccepted) {
+      navigate('/signupInterest');
+    } else {
+      // Alert or display an error message
+      alert('Please fill in all fields and accept the terms and conditions.');
+    }
+
+  };
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{position: 'relative', height: "100vh" }}>
     <Background/>
@@ -19,15 +47,15 @@ export default function SignUpPage() {
           </div>
           <Form>
             <Form.Group className="mb-3" controlId="formFirstName">
-              <Form.Control type="text" placeholder="Prénom" />
+              <Form.Control type="text" placeholder="Prénom" required value={firstName} onChange={e => setFirstName(e.target.value)}/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formLastName">
-              <Form.Control type="text" placeholder="Nom de famille" />
+              <Form.Control type="text" placeholder="Nom de famille" required value={lastName} onChange={e => setLastName(e.target.value)}/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formMunicipality">
-            <Form.Select defaultValue="Municipalité">
+            <Form.Select defaultValue="Municipalité" value={municipality} onChange={e => setMunicipality(e.target.value)}>  
                 <option disabled>Municipalité</option>
                 <option value="Valcourt">Valcourt</option>
                 <option value="Canton de Valcourt">Canton de Valcourt</option>
@@ -45,28 +73,29 @@ export default function SignUpPage() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Control type="email" placeholder="Courriel" />
+              <Form.Control type="email" placeholder="Courriel" required value={email} onChange={e => setEmail(e.target.value)}/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Control type="password" placeholder="Mot de passe" />
+              <Form.Control type="password" placeholder="Mot de passe" required value={password} onChange={e => setPassword(e.target.value)}/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPasswordRepeat">
-              <Form.Control type="password" placeholder="Mot de passe" />
+              <Form.Control type="password" placeholder="Mot de passe" required value={passwordRepeat} onChange={e => setPasswordRepeat(e.target.value)}/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicCheckbox">
-              <Form.Check type="checkbox" label="Conditions de services" />
+              <Form.Check type="checkbox" label="Conditions de services" required value={termsAccepted} onChange={e => setTermsAccepted(e.target.value)}/>
             </Form.Group>
 
             <div className="d-grid gap-2">              
             <Button style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }} 
               type="submit" 
-              className="w-100 mb-2">
+              className="w-100 mb-2"
+              onClick={handleSubmit}>
                 Suivant
               </Button>
-              <Button variant="secondary" type="button">
+              <Button variant="secondary" type="button" onClick={handlePrevious}>
               Précédent
               </Button>
 
