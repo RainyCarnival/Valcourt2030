@@ -23,12 +23,12 @@ module.exports = {
 	},
 	'rules': {
 		/* Code style rules */
-		'indent': [ 'error', 'tab', ],
+		'indent': [ 'warn', 'tab', ],
 		'space-before-function-paren': ['error', 'never', ],
 		// 'keyword-spacing': 'error',
 		'space-infix-ops': 'error',
 		'linebreak-style': [ 'warn', 'windows', ],
-		'quotes': [ 'error', 'single', ],
+		'quotes': [ 'warn', 'single', ],
 		'semi': [ 'error', 'always', ],
 
 		/* Variable and function naming rules. */
