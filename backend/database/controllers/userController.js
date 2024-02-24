@@ -16,8 +16,9 @@ async function isEmailUnique(email) {
 
 		const user = await User.findOne({ email });
 		return !user;
+
 	} catch (error) {
-		console.error('Error checking email uniqueness: ', error);
+		console.error('Unexpected error checking email uniqueness: ', error);
 		throw error;
 	}
 }
@@ -26,9 +27,10 @@ async function isEmailUnique(email) {
  * Method to register a user into the database.
  * 
  * @param {Object} userInfo - An object containing the necessary information to create a user. (required: firstName, lastName, email, password, not required: municipality, interestedTags). interestedTags must be an Array.
+ * @param {boolean} isAdmin - A boolean value determining if the registered user will be an admin or not.
  * @returns {boolean} Returns true on creation of user in the database. Otherwise returns false.
  */
-async function registerUser(userInfo) {
+async function registerUser(userInfo, isAdmin = false) {
 	try {
 		if(!userInfo.firstName || !userInfo.lastName || !userInfo.email || !userInfo.password){
 			console.log('Missing required fields: ', Object.keys(userInfo).filter(key => !userInfo[key]));
@@ -47,11 +49,12 @@ async function registerUser(userInfo) {
 			password: userInfo.password,
 			municipality: userInfo.municipality,
 			interestedTags: userInfo.interestedTags,
+			isAdmin: isAdmin
 		});
 
 		return true;
 	} catch(error) {
-		console.error('Error creating user: ', error);
+		console.error('Unexpected error creating user: ', error);
 		return false;
 	}
 }
@@ -92,14 +95,75 @@ async function loginUser(email, password) {
 		}
 	}
 	catch(error) {
-		console.error('Error loging in: ', error);
+		console.error('Unexpected error logging in: ', error);
 		return false;
 	}
 }
 
-// TODO: Create a function to update the users
-// TODO: Create a function to delete a user
-// TODO: Create a function to create a user as an admin
-// TODO: Create a function to get all the users from the database.
+// TODO Add documentation to methods.
+async function updateOneUser(email, userUpdateData) {
+	try{
+		const result = await User.updateOne({ email }, {$set: userUpdateData });
 
-module.exports = { isEmailUnique, registerUser, loginUser };
+		if(result.nModified > 0) {
+			return true;
+		} else {
+			console.error('No matching document found for update.');
+			return false;
+		}
+
+	} catch (error) {
+		console.error('Unexpected error occured when updated user data: ', error);
+	}
+
+}
+
+async function deleteOneUser(userToDelete) {
+	try{
+		const result = await User.deleteOne({ email: userToDelete });
+
+		if (result.deletedCount > 0){
+			return true;
+		} else {
+			console.error('No matching user to delete');
+			return false;
+		}
+	} catch (error) {
+		console.error('Unexpected error occured deleting the user: ', error);
+		throw error;
+	}
+}
+
+async function getOneUser(userToFind){
+	try {
+		const user = await User.findOne(userToFind);
+
+		if(user){
+			return user;
+		} else {
+			console.error('User not found.');
+			return false;
+		}
+	} catch (error) {
+		console.error('Unexpected error getting the user: ', error);
+		throw error;
+	}
+}
+
+async function getAllUsers(){
+	try{
+		const users = await User.find({}).toArray();
+
+		if(users.length === 0){
+			console.warn('No users found.');
+		}
+
+		return users;
+
+	} catch (error) {
+		console.error('Unexpected error retreiving the list of users: ', error);
+		throw error;
+	}
+}
+
+module.exports = { isEmailUnique, registerUser, loginUser, deleteOneUser, updateOneUser, getOneUser, getAllUsers };

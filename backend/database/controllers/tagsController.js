@@ -1,9 +1,31 @@
 const Tag = require('../models/tagsModel');
-// TODO: Create documentation
+// TODO Create documentation
+
+async function getOneTag(tagToFind){
+    try {
+        const tag = await Tag.findOne(tagToFind);
+
+        if(tag){
+            return tag;
+        } else {
+            console.error('Tag not found.');
+            return false;
+        }
+
+    } catch (error) {
+        console.error('Unexpected error retreiving the tag: ', error);
+        throw error;
+    }
+}
 
 async function getAllTags(){
     try {
         const tags = await Tag.find({}).toArray();
+
+        if(tags.length === 0){
+            console.warn('No tags found.');
+        }
+
         return tags;
 
     } catch (error) {
@@ -29,9 +51,9 @@ async function createOneTag(newTag){
     }
 }
 
-async function deleteOneTag(deleteTag){
+async function deleteOneTag(tagToDelete){
     try {
-        const result = await Tag.deleteOne({ tag: deleteTag });
+        const result = await Tag.deleteOne({ tag: tagToDelete });
     
         if (result.deletedCount > 0){
             return true;
@@ -45,9 +67,9 @@ async function deleteOneTag(deleteTag){
     }
 }
 
-async function updateTag(currentTag, updatedTag) {
+async function updateTag(currentTag, tagUpdateData) {
     try{
-        const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: updatedTag }});
+        const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: tagUpdateData }});
 
         if(result.n > 0){
             return true;
@@ -61,4 +83,4 @@ async function updateTag(currentTag, updatedTag) {
     }
 }
 
-module.exports = { getAllTags, createOneTag, deleteOneTag, updateTag };
+module.exports = { getOneTag, getAllTags, createOneTag, deleteOneTag, updateTag };
