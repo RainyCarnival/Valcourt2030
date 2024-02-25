@@ -25,7 +25,10 @@ connectToDatabase().then(() => {
 	app.use(standardAuth);
     
 	app.get('/', (req, res) => {
-		res.status(200).send({message: 'Server is running.'});
+		res.status(200).send({
+			message: 'Server is running.',
+			status: true
+		});
 	});
     
 	app.listen(process.env.PORT || 3000, () => {
