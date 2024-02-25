@@ -10,12 +10,18 @@ router.get('/', (req, res) => {
 	res.send({message: 'Auth route is running.'});
 });
 
+
 router.post('/register', async(req, res) => {
 	const body = req.body;
 
 	const verifiedEmail = validation.emailValidation(body.email);
 
 	const verifiedPassword = validation.passwordValidation(body.password);
+
+    if (!body.password) {
+        res.status(400).send({password: 'Password field is required.'});
+        return
+    }
 
 	if (!verifiedEmail.valid) {
 		res.status(400).send({message: verifiedEmail.message});
@@ -26,9 +32,20 @@ router.post('/register', async(req, res) => {
 		res.status(400).res.send({message: verifiedPassword.message});
 		return;
 	}
-    
-	// TODO: Add a verification that First name exists
-	// TODO: Add a verification that Last name exists
+
+    if (!body.firstName) {
+        res.status(400).send({
+            message: "First name is required."
+        });
+        return
+    }
+
+    if (!body.lastName) {
+        res.status(400).send({
+            message: "Last name is required."
+        });
+        return
+    }
 
 	if (!(await isEmailUnique(body.email))){
 		// TODO: If needed adjust failure logic.
@@ -49,17 +66,18 @@ router.post('/register', async(req, res) => {
 		email: body.email,
 		password: passwordHash,
 		interestedTags: body.interestedTags
-	};
+	}
 
 	if (await registerUser(userInfo)){
 		// TODO: If needed adjust success logic.
 		res.status(201).send({
-			message: 'User succesfully created.'
+			message: 'Registration successful.',
+			status: true
 		});
 	} else {
-		res.status(401).send({
-			message: 'User creation failed. Please try again later.'
-		});
+        res.status(401).send({
+            message: 'User creation failed. Please try again later.'
+        });
 	}
 });
 
@@ -72,6 +90,7 @@ router.post('/login', async(req, res) => {
 		});
 		return;
 	}
+	
 	if (!body.password) {
 		res.status(400);
 		res.send({
@@ -80,19 +99,18 @@ router.post('/login', async(req, res) => {
 		return;
 	}
 
-	if(await loginUser(body.email, body.password)){
+	if (await loginUser(body.email, body.password)){
 		// TODO: If needed adjust success logic.
 		res.status(200);
 		res.send({
-			message: 'Success.',
-			body: body,
-			//verify
+			message: 'Login successful.',
+			status: true
 		});
 
-	} else{
+	} else {
 		res.status(401).send({
-			message: 'Failed.',
-		});
+            message: 'Email or password is incorrect.',
+        });
 	}
 });
 
