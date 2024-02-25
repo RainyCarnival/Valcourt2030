@@ -55,22 +55,21 @@ export default function LoginPage() {
           const { status } = error.response;
 
           if (status === 400) {
-            setError('* Identifiants de connexion incorrects. \n\nVeuillez vérifier votre adresse courriel et votre mot de passe.');
+            setError('* Identifiants de connexion incorrects. \nVeuillez vérifier votre adresse courriel et votre mot de passe.');
           } else if (status === 500) {
             setError('* Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
           } else {
             setError(`* Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
           }
         } else {
-          // Handle non-Axios errors
-          setError(`* Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.`);
+          setError(`* Une erreur interne du serveur s'est produite. \nVeuillez réessayer plus tard.`);
         }
       }
     }
   };
 
   const handleSignUpClick = () => {
-    navigate('/signup'); // Navigate to the signup page
+    navigate('/signup');
   };
 
   const handleChange = (event) => {
