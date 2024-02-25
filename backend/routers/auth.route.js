@@ -6,92 +6,94 @@ const { isEmailUnique, registerUser, loginUser } = require('../database/controll
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.status(200);
-    res.send({message: 'Auth route is running.'});
+	res.status(200);
+	res.send({message: 'Auth route is running.'});
 });
 
-router.post('/register', async (req, res) => {
-    const body = req.body;
+router.post('/register', async(req, res) => {
+	const body = req.body;
 
-    const verifiedEmail = validation.emailValidation(body.email);
+	const verifiedEmail = validation.emailValidation(body.email);
 
-    const verifiedPassword = validation.passwordValidation(body.password);
+	const verifiedPassword = validation.passwordValidation(body.password);
 
-    if (!verifiedEmail.valid) {
-        res.status(400).send({message: verifiedEmail.message});
-        return
-    };
+	if (!verifiedEmail.valid) {
+		res.status(400).send({message: verifiedEmail.message});
+		return;
+	}
 
-    if (!verifiedPassword.valid) {
-        res.status(400).res.send({message: verifiedPassword.message});
-        return
-    };
+	if (!verifiedPassword.valid) {
+		res.status(400).res.send({message: verifiedPassword.message});
+		return;
+	}
     
-    // TODO: Add a verification that First name exists
-    // TODO: Add a verification that Last name exists
+	// TODO: Add a verification that First name exists
+	// TODO: Add a verification that Last name exists
 
-    if (!(await isEmailUnique(body.email))){
-        // TODO: If needed adjust failure logic.
-        res.status(409);
-        res.send({
-            message: 'Email already in use.'
-        });
-        return;
-    };
+	if (!(await isEmailUnique(body.email))){
+		// TODO: If needed adjust failure logic.
+		res.status(409);
+		res.send({
+			message: 'Email already in use.'
+		});
+		return;
+	}
 
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(body.password, salt);
+	const salt = await bcrypt.genSalt(10);
+	const passwordHash = await bcrypt.hash(body.password, salt);
 
-    const userInfo = {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        municipality: body.municipality,
-        email: body.email,
-        password: passwordHash,
-        interestedTags: body.interestedTags
-    }
+	const userInfo = {
+		firstName: body.firstName,
+		lastName: body.lastName,
+		municipality: body.municipality,
+		email: body.email,
+		password: passwordHash,
+		interestedTags: body.interestedTags
+	};
 
-    if (await registerUser(userInfo)){
-        // TODO: If needed adjust success logic.
-        res.status(201).send({
-            message: "User succesfully created.",
-        });
-    } else {
-        // TODO: Enter failure logic.
-    }
+	if (await registerUser(userInfo)){
+		// TODO: If needed adjust success logic.
+		res.status(201).send({
+			message: 'User succesfully created.'
+		});
+	} else {
+		res.status(401).send({
+			message: 'User creation failed. Please try again later.'
+		});
+	}
 });
 
-router.post('/login', async (req, res) => {
-    const body = req.body;
+router.post('/login', async(req, res) => {
+	const body = req.body;
     
-    if (!body.email) {
-        res.status(400).send({
-            message: 'Email field is required.'
-        });
-        return
-    }
-    if (!body.password) {
-        res.status(400);
-        res.send({
-            message: 'Password field is required.'
-        });
-        return
-    }
+	if (!body.email) {
+		res.status(400).send({
+			message: 'Email field is required.'
+		});
+		return;
+	}
+	if (!body.password) {
+		res.status(400);
+		res.send({
+			message: 'Password field is required.'
+		});
+		return;
+	}
 
-    if(await loginUser(body.email, body.password)){
-        // TODO: If needed adjust success logic.
-        res.status(200);
-        res.send({
-            message: "Success.",
-            body: body,
-            verify
-        });
+	if(await loginUser(body.email, body.password)){
+		// TODO: If needed adjust success logic.
+		res.status(200);
+		res.send({
+			message: 'Success.',
+			body: body,
+			//verify
+		});
 
-    }else{
-        // TODO: Enter failed login logic.
-    }
-
-
+	} else{
+		res.status(401).send({
+			message: 'Failed.',
+		});
+	}
 });
 
 module.exports = router;
