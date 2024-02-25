@@ -21,6 +21,14 @@ router.post('/register', async(req, res) => {
 
 	const verifiedPassword = validation.passwordValidation(body.password);
 
+	if (!body.email) {
+        res.status(400).send({
+			password: 'Email field is required.',
+			status: false
+		});
+        return
+    }
+
     if (!body.password) {
         res.status(400).send({
 			password: 'Password field is required.',
