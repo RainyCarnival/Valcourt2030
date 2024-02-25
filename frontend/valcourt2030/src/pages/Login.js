@@ -21,10 +21,10 @@ export default function LoginPage() {
     const { email, password } = values;
 
     if (email === "") {
-      setError('* Courriel et mot de passe est requis.')
+      setError('Courriel et mot de passe est requis.')
       return false;
     } else if (password === "") {
-      setError('* Courriel et mot de passe est requis.')
+      setError('Courriel et mot de passe est requis.')
       return false;
     }
     return true;
@@ -55,11 +55,11 @@ export default function LoginPage() {
           const { status } = error.response;
 
           if (status === 400) {
-            setError('* Identifiants de connexion incorrects. \nVeuillez vérifier votre adresse courriel et votre mot de passe.');
+            setError('Identifiants de connexion incorrects. \nVeuillez vérifier votre adresse courriel et votre mot de passe.');
           } else if (status === 500) {
-            setError('* Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
+            setError('Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
           } else {
-            setError(`* Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
+            setError(`Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
           }
         } else {
           setError(`* Une erreur interne du serveur s'est produite. \nVeuillez réessayer plus tard.`);

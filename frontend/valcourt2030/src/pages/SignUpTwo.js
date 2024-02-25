@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Card, Button, ButtonGroup, ToggleButton } from 'react-bootstrap';
 import logo from '../logo.png'; // Ensure the logo path is correct
 import Background from '../components/Background';
 
 export default function SignUpInterestPage() {
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const location = useLocation();
+  const initialFormData = location.state?.formData || {
+    firstName: '', 
+    lastName: '',
+    municipality: 'Municipalité',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    terms: false
+  };
 
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [formData] = useState(initialFormData);
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
@@ -15,8 +26,16 @@ export default function SignUpInterestPage() {
   }
 
   const handlePrevious = () => {
-    navigate('/signup');
+    const updatedFormData = {
+      ...formData,
+      password: '',
+      confirmPassword: '',
+      terms: false,
+    };
+
+    navigate('/signup', { state: { formData: updatedFormData } });
   }
+
   const interests = [
     { name: 'Sport', value: 'sport' },
     { name: 'Integration', value: 'integration' },
