@@ -26,13 +26,13 @@ export default function SignUpPage() {
     password: true,
     confirmPassword: true,
   }
-  
+
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(initialValid);
 
   const handlePrevious = () => {
-    navigate('/login');
+    navigate('/login', {replace: true});
   }
 
   const validateField = (fieldName, value) => {
@@ -115,7 +115,7 @@ export default function SignUpPage() {
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{position: 'relative', height: "100vh" }}>
     <Background/>
-      <Card style={{ width: '300px', padding: '20px', borderRadius: '15px',backgroundColor: 'rgba(255, 255, 255, 0.5)', boxShadow: '0px 0px 10px rgba(0,0,0,0.1)' }}>
+      <Card style={{ width: '400px', padding: '20px', borderRadius: '15px',backgroundColor: 'rgba(255, 255, 255, 0.5)', boxShadow: '0px 0px 10px rgba(0,0,0,0.1)' }}>
         <Card.Body>
           <div className="text-center mb-4">
             <img
@@ -124,6 +124,9 @@ export default function SignUpPage() {
               style={{ width: '200px' }} // Adjust size as needed
             />
           </div>
+          <Card.Text className="text-center mb-4">
+            Veuillez remplir tous les champs obligatoires marqués d'un astérisque (*)
+          </Card.Text>
           <Form>
             <Form.Group className="mb-3" controlId="formFirstName">
               <Form.Control type="text" placeholder="*Prénom" required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} 

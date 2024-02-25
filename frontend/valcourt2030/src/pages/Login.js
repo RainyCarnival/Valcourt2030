@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png';
@@ -8,8 +8,11 @@ import axios from 'axios';
 import { loginRoute } from '../utils/APIRoutes';
 
 export default function LoginPage() {
+  const location = useLocation();
+
   const [values, setValues] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(location.state?.message || null)
 
   const navigate = useNavigate(); // Hook for navigation
 
@@ -21,9 +24,11 @@ export default function LoginPage() {
     const { email, password } = values;
 
     if (email === "") {
+      setMessage(null);
       setError('Courriel et mot de passe est requis.')
       return false;
     } else if (password === "") {
+      setMessage(null);
       setError('Courriel et mot de passe est requis.')
       return false;
     }
@@ -55,13 +60,17 @@ export default function LoginPage() {
           const { status } = error.response;
 
           if (status === 400) {
+            setMessage(null);
             setError('Identifiants de connexion incorrects. \nVeuillez vérifier votre adresse courriel et votre mot de passe.');
           } else if (status === 500) {
+            setMessage(null);
             setError('Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
           } else {
+            setMessage(null);
             setError(`Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
           }
         } else {
+          setMessage(null);
           setError(`* Une erreur interne du serveur s'est produite. \nVeuillez réessayer plus tard.`);
         }
       }
@@ -99,6 +108,11 @@ export default function LoginPage() {
             {error && (
               <div className="alert alert-danger my-3 py-2" role="alert" style={{ fontSize: 'small' }}>
                 {error}
+              </div>
+            )}
+            {message && (
+              <div className="alert alert-success my-3 py-2" role="alert" style={{ fontSize: 'small' }}>
+                {message}
               </div>
             )}
             <Button 
