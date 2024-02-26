@@ -12,7 +12,7 @@ export default function SignUpPage() {
   const initialFormData = location.state?.formData || {
     firstName: '', 
     lastName: '',
-    municipality: 'Municipalite',
+    municipality: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -138,8 +138,10 @@ export default function SignUpPage() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formMunicipality">
-            <Form.Select value={formData.municipality} onChange={e => setFormData({...formData, municipality: e.target.value})}>  
-                <option value="Municipalite" disabled>Municipalité</option>
+            <Form.Select value={formData.municipality || ''} onChange={e => setFormData({...formData, municipality: e.target.value})}
+            // TODO Make the municipality list dynamic pulling values from the database
+            >
+                <option value="" disabled>Choisir une municipalité</option>
                 <option value="Valcourt">Valcourt</option>
                 <option value="Canton de Valcourt">Canton de Valcourt</option>
                 <option value="Bonsecours">Bonsecours</option>

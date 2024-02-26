@@ -59,15 +59,15 @@ export default function LoginPage() {
         if (axios.isAxiosError(error) && error.response) {
           const { status } = error.response;
 
-          if (status === 400) {
+          if (status === 401) {
             setMessage(null);
-            setError('Identifiants de connexion incorrects. \nVeuillez vérifier votre adresse courriel et votre mot de passe.');
-          } else if (status === 500) {
+            setError('Identifiants de connexion incorrects. Veuillez vérifier votre adresse courriel et votre mot de passe.');
+          } else if (status === 400) {
             setMessage(null);
-            setError('Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
+            setError('Courriel et mot de passe est requis.');
           } else {
             setMessage(null);
-            setError(`Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
+            setError(`Erreur inattendue lors de la connexion. Veuillez réessayer plus tard.`);
           }
         } else {
           setMessage(null);

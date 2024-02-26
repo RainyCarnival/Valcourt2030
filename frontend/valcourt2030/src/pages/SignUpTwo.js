@@ -36,14 +36,18 @@ export default function SignUpInterestPage() {
         const { status } = error.response;
 
         if (status === 400) {
-          setError(error.response);
+          setError('Erreur lors de l\'envoi de vos informations. Veuillez réessayer ultérieurement.');
+        } else if (status === 401){
+          setError('La création du compte a échoué. Veuillez réessayer plus tard.');
+        } else if (status === 409) {
+          setError('Erreur de création de compte, cet courriel est déjà utilisé.');
         } else if (status === 500) {
           setError('Une erreur interne du serveur s\'est produite. \nVeuillez réessayer plus tard.');
         } else {
-          setError(`Erreur inattendue lors de la connexion. \nVeuillez réessayer plus tard.`);
+          setError(`Erreur inattendue lors de la connexion. Veuillez réessayer plus tard.`);
         }
       } else {
-        setError(`* Une erreur interne du serveur s'est produite. \nVeuillez réessayer plus tard.`);
+        setError(`Une erreur interne du serveur s'est produite. Veuillez réessayer plus tard.`);
       }
     }
   }
@@ -59,6 +63,7 @@ export default function SignUpInterestPage() {
     navigate('/signup', { state: { formData: updatedFormData } });
   }
 
+  // TODO make list pull tags from the database and set their value as their databases ObjectId.
   const interests = [
     { name: 'Sport', value: 'sport' },
     { name: 'Integration', value: 'integration' },
