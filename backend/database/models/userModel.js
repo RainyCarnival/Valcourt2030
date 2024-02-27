@@ -35,8 +35,10 @@ const UserSchema = new mongoose.Schema({
 		required: false
 	},
 	interestedTags: [{
-		type: mongoose.Schema.Types.ObjectId,
-		ref:'Tags',
+		// TODO replace type: string to Tags reference once front end is set up.
+		type: String,
+		// type: mongoose.Schema.Types.ObjectId,
+		// ref:'Tags',
 		required: false
 	}] ,
 	isAdmin: {
