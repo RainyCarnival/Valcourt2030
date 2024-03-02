@@ -39,7 +39,7 @@ const UserSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref:'Tags',
 		required: false
-	}] ,
+	}],
 	isAdmin: {
 		type:Boolean,
 		default: false,
