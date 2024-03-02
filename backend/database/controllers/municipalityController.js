@@ -20,13 +20,13 @@ async function getOneMunicipality(municipalityToFind){
 
 async function getAllMunicipalities(){
 	try {
-		const tags = await Municipality.find({});
+		const municipalities = await Municipality.find({});
 
-		if(tags.length === 0){
+		if(municipalities.length === 0){
 			console.warn('No municipalities found.');
 		}
 
-		return tags;
+		return municipalities;
 
 	} catch (error) {
 		console.error('Unexpected error retreiving the list of municipalities: ', error);

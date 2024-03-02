@@ -7,6 +7,7 @@ const authRouter = require('./routers/auth.route');
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
+const { getAllMunicipalities } = require('./database/controllers/municipalityController');
 require('dotenv').config();
 
 const app = express();
@@ -16,8 +17,8 @@ app.use(morgan('tiny'));
 app.use(cors());
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something went wrong!');
+	console.error(err.stack);
+	res.status(500).send('Something went wrong!');
 });
 
 connectToDatabase().then(() => {
@@ -29,6 +30,17 @@ connectToDatabase().then(() => {
 		}
 		else{
 			res.status(400).send({status: false, message: 'No tags in database'});
+		}
+	});
+
+	// FIXME Temp placement for frontend testing
+	app.get('/getAllMunicipalities', async(req, res) => {
+		const municipalities = await getAllMunicipalities();
+		if(municipalities.length > 0){
+			res.status(200).send({status: true, municipalities: municipalities}); 
+		}
+		else{
+			res.status(400).send({status: false, message: 'No municipalities in database'});
 		}
 	});
 

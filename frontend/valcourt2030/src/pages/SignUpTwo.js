@@ -11,7 +11,7 @@ export default function SignUpInterestPage() {
   const navigate = useNavigate();
   const location = useLocation();
   
-  const [tags, setTags] = useState([{tag: '', _id: ''}]);
+  const [tags, setTags] = useState([]);
   const [interestedTags, setInterestedTags] = useState([]);
   const [formData] = useState(location.state?.formData || {});
   const [error, setError] = useState(null);

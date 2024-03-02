@@ -31,7 +31,8 @@ const UserSchema = new mongoose.Schema({
 		required: true
 	},
 	municipality: {
-		type: String,
+		type: mongoose.Schema.Types.ObjectId,
+		ref:'Municipalities',
 		required: false
 	},
 	interestedTags: [{
