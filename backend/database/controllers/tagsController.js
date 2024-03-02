@@ -20,7 +20,7 @@ async function getOneTag(tagToFind){
 
 async function getAllTags(){
     try {
-        const tags = await Tag.find({}).toArray();
+        const tags = await Tag.find({});
 
         if(tags.length === 0){
             console.warn('No tags found.');

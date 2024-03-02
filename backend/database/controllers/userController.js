@@ -152,7 +152,7 @@ async function getOneUser(userToFind){
 
 async function getAllUsers(){
 	try{
-		const users = await User.find({}).toArray();
+		const users = await User.find({});
 
 		if(users.length === 0){
 			console.warn('No users found.');
