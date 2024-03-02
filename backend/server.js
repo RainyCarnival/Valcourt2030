@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRouter = require('./routers/auth.route');
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
+const { getAllTags } = require('./database/controllers/tagsController');
 require('dotenv').config();
 
 const app = express();
@@ -20,6 +21,17 @@ app.use((err, req, res, next) => {
 });
 
 connectToDatabase().then(() => {
+	// FIXME Temp placement for frontend testing
+	app.get('/getAllTags', async(req, res) => {
+		const tags = await getAllTags();
+		if(tags.length > 0){
+			res.status(200).send({status: true, tags: tags}); 
+		}
+		else{
+			res.status(400).send({status: false, message: 'No tags in database'});
+		}
+	});
+
 	app.use('/auth', authRouter);
     
 	app.use(standardAuth);

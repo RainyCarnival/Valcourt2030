@@ -5,12 +5,13 @@ import { Container, Card, Button, ButtonGroup, ToggleButton } from 'react-bootst
 import logo from '../logo.png'; // Ensure the logo path is correct
 import Background from '../components/Background';
 import axios from 'axios';
-import { registerRoute } from '../utils/APIRoutes';
+import { allTagsRoute, registerRoute } from '../utils/APIRoutes';
 
 export default function SignUpInterestPage() {
   const navigate = useNavigate();
   const location = useLocation();
   
+  const [tags, setTags] = useState([{tag: '', _id: ''}]);
   const [interestedTags, setInterestedTags] = useState([]);
   const [formData] = useState(location.state?.formData || {});
   const [error, setError] = useState(null);
@@ -20,7 +21,18 @@ export default function SignUpInterestPage() {
     if(!location.state || !location.state.formData) {
       navigate('/signup');
     }
+
+    getAllTags()
+
   }, [location.state, navigate])
+
+  const getAllTags = async () => {
+    const { data } = await axios.get(allTagsRoute);
+
+    if (data.status){
+      setTags(data.tags);
+    }
+  }
 
   const handleSubmit = async (event) => {
     const registerData = {...formData, interestedTags}
@@ -63,18 +75,6 @@ export default function SignUpInterestPage() {
     navigate('/signup', { state: { formData: updatedFormData } });
   }
 
-  // TODO make list pull tags from the database and set their value as their databases ObjectId.
-  const interests = [
-    { name: 'Sport', value: 'sport' },
-    { name: 'Integration', value: 'integration' },
-    { name: 'Cuisine', value: 'cooking' },
-    { name: 'Français', value: 'french' },
-    { name: 'Education', value: 'education' },
-    { name: 'Nouvelles', value: 'news' },
-    { name: 'Art', value: 'art' },
-    { name: 'Entreprise', value: 'business' },
-  ];
-
   const handleSelect = (interestValue) => {
     const currentIndex = interestedTags.indexOf(interestValue);
     const newinterestedTags = [...interestedTags];
@@ -104,18 +104,18 @@ export default function SignUpInterestPage() {
             Veuillez sélectionner les activités qui vous intéressent! (Optionnel)
           </Card.Text>
           <ButtonGroup className="mb-3 d-flex flex-wrap">
-            {interests.map((interest) => (
+            {tags.map((tag) => (
               <ToggleButton
-                key={interest.value}
-                id={`interest-${interest.value}`}
+                key={tag._id}
+                id={`tag-${tag.tag}`}
                 type="checkbox"
                 variant="outline-secondary"
-                value={interest.value}
-                checked={interestedTags.includes(interest.value)}
-                onChange={() => handleSelect(interest.value)}
+                value={tag._id}
+                checked={interestedTags.includes(tag._id)}
+                onChange={() => handleSelect(tag._id)}
                 className="m-1 rounded"
               >
-                {interest.name}
+                {tag.tag}
               </ToggleButton>
             ))}
           </ButtonGroup>
