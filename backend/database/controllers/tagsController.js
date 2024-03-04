@@ -46,9 +46,14 @@ async function createOneTag(newTag){
 			return false;
 		}
 	} catch (error) {
-		console.error('Unexpected error creating tag: ', error);
-		throw error;
-	}
+        if (error.name === 'MongoError' && error.code === 11000) {
+            console.error('Tag already exists. Duplicate key violation.');
+            return false;
+        } else {
+            console.error('Unexpected error creating tag: ', error);
+            throw error;
+        }
+    }
 }
 
 async function deleteOneTag(tagToDelete){
@@ -78,9 +83,14 @@ async function updateTag(currentTag, tagUpdateData) {
 			return false;
 		}
 	} catch (error) {
-		console.error('Unexpected error updated the tag: ', error);
-		throw error;
-	}
+        if (error.name === 'MongoError' && error.code === 11000) {
+            console.error('Update failed due to duplicate tag value.');
+            return false;
+        } else {
+            console.error('Unexpected error updating the tag: ', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = { getOneTag, getAllTags, createOneTag, deleteOneTag, updateTag };

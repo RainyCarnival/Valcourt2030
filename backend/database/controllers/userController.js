@@ -115,7 +115,6 @@ async function updateOneUser(email, userUpdateData) {
 	} catch (error) {
 		console.error('Unexpected error occured when updated user data: ', error);
 	}
-
 }
 
 async function deleteOneUser(userToDelete) {
@@ -136,7 +135,7 @@ async function deleteOneUser(userToDelete) {
 
 async function getOneUser(userToFind){
 	try {
-		const user = await User.findOne(userToFind);
+		const user = await User.findOne(userToFind).populate(['interestedTags', 'municipality']);
 
 		if(user){
 			return user;
@@ -152,7 +151,7 @@ async function getOneUser(userToFind){
 
 async function getAllUsers(){
 	try{
-		const users = await User.find({});
+		const users = await User.find({}).populate(['interestedTags', 'municipality']);
 
 		if(users.length === 0){
 			console.warn('No users found.');

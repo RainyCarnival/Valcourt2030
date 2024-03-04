@@ -34,7 +34,7 @@ async function getAllMunicipalities(){
 	}
 }
 
-async function createOneTag(newMunicipality){
+async function createOneMunicipality(newMunicipality){
 	try{        
 		const isExisting = await Municipality.findOne({ municipality: {$regex: newMunicipality, $options: 'i'} });
 
@@ -46,8 +46,13 @@ async function createOneTag(newMunicipality){
 			return false;
 		}
 	} catch (error) {
-		console.error('Unexpected error creating municipality: ', error);
-		throw error;
+		if (error.name === 'MongoError' && error.code === 11000) {
+			console.error('Municipality already exists. Duplicate key violation.');
+			return false;
+		} else {
+			console.error('Unexpected error updating the municipality: ', error);
+			throw error;
+		}
 	}
 }
 
@@ -78,9 +83,14 @@ async function updateMunicipality(currentMunicipality, municipalityUpdateData) {
 			return false;
 		}
 	} catch (error) {
-		console.error('Unexpected error updated the municipality: ', error);
-		throw error;
+		if (error.name === 'MongoError' && error.code === 11000) {
+			console.error('Update failed due to duplicate municipality value.');
+			return false;
+		} else {
+			console.error('Unexpected error updating the municipality: ', error);
+			throw error;
+		}
 	}
 }
 
-module.exports = { getOneMunicipality, getAllMunicipalities, createOneTag, deleteOneMunicipality, updateMunicipality };
+module.exports = { getOneMunicipality, getAllMunicipalities, createOneMunicipality, deleteOneMunicipality, updateMunicipality };
