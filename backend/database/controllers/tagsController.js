@@ -1,4 +1,5 @@
 const Tag = require('../models/tagsModel');
+const { createOneMailingList } = require('./mailingListController');
 // TODO Create documentation
 
 async function getOneTag(tagToFind){
@@ -39,7 +40,8 @@ async function createOneTag(newTag){
 		const isExisting = await Tag.findOne({ tag: {$regex: newTag, $options: 'i'} });
 
 		if (!isExisting){
-			await Tag.create({ tag: newTag });
+			const createdTag = await Tag.create({ tag: newTag });
+            createOneMailingList(createdTag._id);
 			return true;
 		} else {
 			console.log('Tag already exists.');
@@ -61,6 +63,7 @@ async function deleteOneTag(tagToDelete){
 		const result = await Tag.deleteOne({ tag: tagToDelete });
     
 		if (result.deletedCount > 0){
+            // TODO: Trigger a call to the Mailing List and Users tables to update the info accordingly
 			return true;
 		} else {
 			console.error('No matching tags to delete.');

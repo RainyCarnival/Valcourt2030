@@ -52,6 +52,7 @@ async function registerUser(userInfo, isAdmin = false) {
 			isAdmin: isAdmin
 		});
 
+		// TODO: Update mailing list if user selected any interested tags
 		return true;
 	} catch(error) {
 		console.error('Unexpected error creating user: ', error);
@@ -106,6 +107,7 @@ async function updateOneUser(email, userUpdateData) {
 		const result = await User.updateOne({ email }, {$set: userUpdateData });
 
 		if(result.nModified > 0) {
+			// TODO: Update the mailing list if the interested tags are changed. 
 			return true;
 		} else {
 			console.error('No matching document found for update.');
@@ -122,6 +124,7 @@ async function deleteOneUser(userToDelete) {
 		const result = await User.deleteOne({ email: userToDelete });
 
 		if (result.deletedCount > 0){
+			// TODO: Update the mailing list.
 			return true;
 		} else {
 			console.error('No matching user to delete');
