@@ -6,10 +6,11 @@ const { getOneMunicipality } = require('./municipalityController');
 
 
 /**
- * Method used to verify the received email does not exist already in the database.
- * 
- * @param {string} email - User entered email. 
- * @returns {boolean} Returns false if the email already exists in the database. Otherwise returns true.
+ * Checks if the given email is unique in the User collection.
+ *
+ * @param {string} email - The email to check for uniqueness.
+ * @returns {boolean} - Returns true if the email is unique, false if it already exists or if the input is missing.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
  */
 async function isEmailUnique(email) {
 	try {
@@ -62,7 +63,6 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 			}
 		}
 
-		// Create a new user document
 		const newUser = await User.create({
 			firstName: userInfo.firstName,
 			lastName: userInfo.lastName,
@@ -109,11 +109,11 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 }
 
 /**
- * Method to login the user into the system.
- * 
- * @param {string} email - Users email used to find the users information in the database. 
- * @param {string} password - Users password used for comparison with database password.
- * @returns {boolean} Returns true on succesful login. Otherwise returns false.
+ * Attempts to authenticate a user by matching the provided email and password.
+ *
+ * @param {string} email - The user's email for authentication.
+ * @param {string} password - The user's password for authentication.
+ * @returns {boolean} - Returns true if authentication is successful, false otherwise.
  */
 async function loginUser(email, password) {
 	try {
@@ -156,7 +156,6 @@ async function loginUser(email, password) {
  * @param {object} userUpdateData - The updated data for the user.
  * @returns {boolean} - Returns true if the update is successful, false otherwise.
  */
-
 async function updateOneUser(email, userUpdateData) {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -243,6 +242,13 @@ async function deleteOneUser(userToDelete) {
 	}
 }
 
+/**
+ * Retrieves a user based on the specified criteria and populates associated fields.
+ *
+ * @param {object} userToFind - Criteria to find the user in the User collection.
+ * @returns {object|boolean} - Returns the found user object if successful, false if not found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getOneUser(userToFind){
 	try {
 		const user = await User.findOne(userToFind).populate(['interestedTags', 'municipality']);
@@ -259,6 +265,12 @@ async function getOneUser(userToFind){
 	}
 }
 
+/**
+ * Retrieves all users from the User collection and populates associated fields.
+ *
+ * @returns {Array} - Returns an array of user objects if successful, an empty array if no users found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getAllUsers(){
 	try{
 		const users = await User.find({}).populate(['interestedTags', 'municipality']);
