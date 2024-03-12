@@ -1,6 +1,7 @@
+const mongoose = require('mongoose');
 const MailingList = require('../models/mailingListModel');
 
-// TODO: Create documentation
+// TODO Create documentation
 async function createOneMailingList(mailingTagId){
 	try {
 		const isExisting = await MailingList.findOne({ tag: {$regex: mailingTagId, $options: 'i'} });
@@ -34,10 +35,21 @@ async function updateOneMailingList(tagId, action, userId){
 
 		switch (action) {
 		case 'add':
+			if (existingMailingList.users.includes(userId)){
+				console.error('User already in mailing list');
+				return true;
+			}
+
 			existingMailingList.users.push(userId);
 			break;
 		case 'remove':
-			existingMailingList.users = existingMailingList.users.filter(user => user !== userId);
+			if (!existingMailingList.users.includes(userId)){
+				console.error('User not found in mailing list');
+				return true;
+			}
+			
+			existingMailingList.users = existingMailingList.users.filter(user => !user.equals(userId));
+
 			break;
 		default:
 			console.error('Invalid action specified');
@@ -46,7 +58,7 @@ async function updateOneMailingList(tagId, action, userId){
 
 		const result = await existingMailingList.save();
 
-		if(result.n > 0){
+		if(result){
 			return true;
 		} else {
 			console.error('No modifications were made to the mailing list.');

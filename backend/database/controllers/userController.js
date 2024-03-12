@@ -1,5 +1,8 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+const { updateOneMailingList } = require('./mailingListController');
+
 
 /**
  * Method used to verify the received email does not exist already in the database.
@@ -101,21 +104,77 @@ async function loginUser(email, password) {
 	}
 }
 
-// TODO Add documentation to methods.
-async function updateOneUser(email, userUpdateData) {
-	try{
-		const result = await User.updateOne({ email }, {$set: userUpdateData });
+/**
+ * Updates user data, including handling interested tags and ensuring transactional consistency.
+ *
+ * @param {string} email - The email of the user to be updated.
+ * @param {object} userUpdateData - The updated data for the user.
+ * @returns {boolean} - Returns true if the update is successful, false otherwise.
+ */
 
-		if(result.nModified > 0) {
-			// TODO: Update the mailing list if the interested tags are changed. 
-			return true;
-		} else {
-			console.error('No matching document found for update.');
-			return false;
+async function updateOneUser(email, userUpdateData) {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
+	try{
+		const originalUser = await User.findOne({email});
+
+		if(!originalUser){
+			throw new Error(`Document Not Found: No document found for ${email} to update.`);
 		}
 
+		const updatedUser = await User.findOneAndUpdate({email}, {$set: userUpdateData}, {new: true});
+
+		// Take the keys from userUpdateData as references to compare the keys from the original and updated data. Returns true if a difference is found, otherwise returns false.
+		const isModified = !Object.keys(userUpdateData).every(key => {
+			return JSON.stringify(updatedUser[key]) === JSON.stringify(originalUser[key]);
+		});
+
+		if(!isModified){
+			throw new Error('Update Error: No modifications made the data is the same.');
+		}
+
+		const addedTags = updatedUser.interestedTags.filter(tag => !originalUser.interestedTags.includes(tag));
+
+		if (addedTags.length > 0){
+			for (const tag of addedTags){
+				const addTagResult = await updateOneMailingList(tag, 'add', updatedUser._id);
+				
+				if (!addTagResult){
+					throw new Error('Update Error: Failed to add user to the mailing list.');
+				}				
+			}
+		}
+
+		const removedTags = originalUser.interestedTags.filter(tag => !updatedUser.interestedTags.includes(tag));
+
+		if (removedTags.length > 0 ){
+			for (const tag of removedTags){
+				const removedTagResult = await updateOneMailingList(tag, 'remove', updatedUser._id);
+				
+				if (!removedTagResult){
+					throw new Error('Update Error: Failed to add user to the mailing list.');
+				}				
+			}
+		}
+
+		await session.commitTransaction();
+		return true;
+
 	} catch (error) {
-		console.error('Unexpected error occured when updated user data: ', error);
+		await session.abortTransaction();
+
+		if (error.message.startsWith('Document Not Found')){
+			console.error(error.message);
+		} else if (error.message.startsWith('Update Error')) {
+			console.error(error.message);
+		} else {
+			console.error('An unexpected error occured when updated user data: ', error);
+		}
+		
+		return false;
+	} finally {
+		session.endSession();
 	}
 }
 
