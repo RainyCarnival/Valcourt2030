@@ -200,7 +200,7 @@ async function updateOneUser(email, userUpdateData) {
 				const removedTagResult = await updateOneMailingList(tag, 'remove', updatedUser._id);
 				
 				if (!removedTagResult){
-					throw new Error('Update Error: Failed to add user to the mailing list.');
+					throw new Error('Update Error: Failed to remove user to the mailing list.');
 				}				
 			}
 		}
@@ -225,33 +225,68 @@ async function updateOneUser(email, userUpdateData) {
 	}
 }
 
-async function deleteOneUser(userToDelete) {
-	try{
-		const result = await User.deleteOne({ email: userToDelete });
+/**
+ * Deletes a user and removes them from the associated mailing lists.
+ *
+ * @param {string} userEmail - The email of the user to be deleted.
+ * @returns {boolean} - Returns true if the deletion is successful, false otherwise.
+ */
+async function deleteOneUser(userEmail) {
+	const session = await mongoose.startSession();
+	session.startTransaction();
 
-		if (result.deletedCount > 0){
-			// TODO: Update the mailing list.
-			return true;
-		} else {
-			console.error('No matching user to delete');
-			return false;
+	try{
+
+		const user = await User.findOne({email: userEmail});
+
+		if(!user){
+			throw new Error('Deletion Error: No matching user to delete');
 		}
+
+		// Remove the user from associated mailing lists
+		if (user.interestedTags.length > 0 ){
+			for (const tag of user.interestedTags){
+				const removedTagResult = await updateOneMailingList(tag, 'remove', user._id);
+				
+				if (!removedTagResult){
+					throw new Error('Update Error: Failed to remove user to the mailing list.');
+				}				
+			}
+		}
+
+		const result = await User.deleteOne({ email: userEmail });
+
+		if (result.deletedCount === 0){
+			throw new Error('Deletion Error: Failed to delete user.');
+		}
+
+		session.commitTransaction();
+		return true;
+
 	} catch (error) {
-		console.error('Unexpected error occured deleting the user: ', error);
-		throw error;
+		session.abortTransaction();
+		if(error.message.startsWith('Deletion Error')){
+			console.error(error.message);
+		} else {
+			console.error('Unexpected error occured deleting the user: ', error);
+		}
+		return false;
+
+	} finally {
+		session.endSession();
 	}
 }
 
 /**
  * Retrieves a user based on the specified criteria and populates associated fields.
  *
- * @param {object} userToFind - Criteria to find the user in the User collection.
+ * @param {object} userEmail - Criteria to find the user in the User collection.
  * @returns {object|boolean} - Returns the found user object if successful, false if not found.
  * @throws {Error} - Throws an error if an unexpected error occurs during the process.
  */
-async function getOneUser(userToFind){
+async function getOneUser(userEmail){
 	try {
-		const user = await User.findOne(userToFind).populate(['interestedTags', 'municipality']);
+		const user = await User.findOne(userEmail).populate(['interestedTags', 'municipality']);
 
 		if(user){
 			return user;
