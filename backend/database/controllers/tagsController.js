@@ -1,7 +1,12 @@
 const Tag = require('../models/tagsModel');
-const { createOneMailingList, deleteOneMailingList } = require('./mailingListController');
 
-// TODO Create documentation
+/**
+ * Retrieves a tag based on the specified criteria.
+ *
+ * @param {object} tagToFind - Criteria to find the tag in the Tag collection.
+ * @returns {object|boolean} - Returns the found tag object if successful, false if not found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getOneTag(tagToFind){
 	try {
 		const tag = await Tag.findOne(tagToFind);
@@ -19,6 +24,12 @@ async function getOneTag(tagToFind){
 	}
 }
 
+/**
+ * Retrieves all tags from the Tag collection.
+ *
+ * @returns {Array} - Returns an array of tag objects if successful, an empty array if no tags found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getAllTags(){
 	try {
 		const tags = await Tag.find({});
@@ -75,8 +86,17 @@ async function deleteOneTag(tagIdToDelete){
 	}
 }
 
+/**
+ * Updates a tag based on the current tag value.
+ *
+ * @param {string} currentTag - The current tag value to identify the tag for update.
+ * @param {string} tagUpdateData - The new tag value to set.
+ * @returns {boolean} - Returns true if the update is successful, false otherwise.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function updateTag(currentTag, tagUpdateData) {
 	try{
+		// Update the tag based on the current tag value
 		const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: tagUpdateData }});
 
 		if(result.n > 0){

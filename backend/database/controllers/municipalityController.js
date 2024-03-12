@@ -1,8 +1,15 @@
 const Municipality = require('../models/municipalityModel');
-// TODO Create documentation
 
+/**
+ * Retrieves a municipality based on the specified criteria.
+ *
+ * @param {string} municipalityToFind - The criteria to find the municipality (case-insensitive).
+ * @returns {object|boolean} - Returns the found municipality object if successful, false if not found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getOneMunicipality(municipalityToFind){
 	try {
+		// Find a municipality based on the specified criteria (case-insensitive)
 		const municipality = await Municipality.findOne({municipality: {$regex: municipalityToFind, $options: 'i'}});
 
 		if(municipality){
@@ -18,6 +25,12 @@ async function getOneMunicipality(municipalityToFind){
 	}
 }
 
+/**
+ * Retrieves all municipalities from the Municipality collection.
+ *
+ * @returns {Array} - Returns an array of municipality objects if successful, an empty array if no municipalities found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function getAllMunicipalities(){
 	try {
 		const municipalities = await Municipality.find({});
@@ -34,6 +47,13 @@ async function getAllMunicipalities(){
 	}
 }
 
+/**
+ * Creates a new municipality if it does not already exist.
+ *
+ * @param {string} newMunicipality - The name of the new municipality to create.
+ * @returns {boolean} - Returns true if the creation is successful, false if the municipality already exists.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function createOneMunicipality(newMunicipality){
 	try{        
 		const isExisting = await Municipality.findOne({ municipality: {$regex: newMunicipality, $options: 'i'} });
@@ -56,6 +76,7 @@ async function createOneMunicipality(newMunicipality){
 	}
 }
 
+// TODO Update users to default municipality if theirs is deleted.
 async function deleteOneMunicipality(municipalityToDelete){
 	try {
 		const result = await Municipality.deleteOne({ municipality: municipalityToDelete });
@@ -72,8 +93,17 @@ async function deleteOneMunicipality(municipalityToDelete){
 	}
 }
 
+/**
+ * Updates a municipality based on the current municipality value.
+ *
+ * @param {string} currentMunicipality - The current municipality value to identify the municipality for update.
+ * @param {string} municipalityUpdateData - The new municipality value to set.
+ * @returns {boolean} - Returns true if the update is successful, false otherwise.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
 async function updateMunicipality(currentMunicipality, municipalityUpdateData) {
 	try{
+		// Update the municipality based on the current municipality value
 		const result = await Municipality.updateOne({ municipality: currentMunicipality }, { $set: { municipality: municipalityUpdateData }});
 
 		if(result.n > 0){
