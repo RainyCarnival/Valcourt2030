@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { updateOneMailingList } = require('./mailingListController');
+const { getOneMunicipality } = require('./municipalityController');
 
 
 /**
@@ -27,39 +28,83 @@ async function isEmailUnique(email) {
 }
 
 /**
- * Method to register a user into the database.
- * 
- * @param {Object} userInfo - An object containing the necessary information to create a user. (required: firstName, lastName, email, password, not required: municipality, interestedTags). interestedTags must be an Array.
- * @param {boolean} isAdmin - A boolean value determining if the registered user will be an admin or not.
- * @returns {boolean} Returns true on creation of user in the database. Otherwise returns false.
+ * Registers a new user, optionally setting them as an admin and specifying validation status.
+ *
+ * @param {object} userInfo - User information, including firstName, lastName, email, password, municipality, interestedTags.
+ * @param {boolean} isAdmin - Optional flag to designate the user as an admin. Default is false.
+ * @param {boolean} isValidated - Optional flag to indicate if the user is validated. Default is false.
+ * @returns {boolean} - Returns true if the registration is successful, false otherwise.
  */
-async function registerUser(userInfo, isAdmin = false) {
+async function registerUser(userInfo, isAdmin = false, isValidated = false) {
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
 	try {
+		// Validate required fields
 		if(!userInfo.firstName || !userInfo.lastName || !userInfo.email || !userInfo.password){
 			console.log('Missing required fields: ', Object.keys(userInfo).filter(key => !userInfo[key]));
 			return false;
 		}
 
+		// Validate that interestedTags is an array if provided
 		if(userInfo.interestedTags && !Array.isArray(userInfo.interestedTags)){
 			console.log('interestedTags must be an array: ', userInfo.interestedTags);
 			return false;
 		}
+		
+		// Set a default municipality if not provided
+		if(!userInfo.municipality){
+			const defaultMunicipality = await getOneMunicipality('autre');
+			console.log(defaultMunicipality);
+			
+			if(defaultMunicipality){
+				userInfo.municipality = defaultMunicipality._id;
+			}
+		}
 
-		await User.create({
+		// Create a new user document
+		const newUser = await User.create({
 			firstName: userInfo.firstName,
 			lastName: userInfo.lastName,
 			email: userInfo.email,
 			password: userInfo.password,
 			municipality: userInfo.municipality,
 			interestedTags: userInfo.interestedTags,
-			isAdmin: isAdmin
+			isAdmin: isAdmin,
+			isValidated: isValidated
 		});
 
-		// TODO: Update mailing list if user selected any interested tags
+		if (!newUser){
+			throw new Error('Creation Error: Failed to create user.');
+		}
+		
+		// Add user to mailing list for each interested tag
+		if (newUser.interestedTags.length > 0){
+			for (const tag of userInfo.interestedTags){
+				const addTagResult = await updateOneMailingList(tag, 'add', newUser._id);
+				
+				if (!addTagResult){
+					throw new Error('Update Error: Failed to add user to the mailing list.');
+				}				
+			}
+		}
+
+		await session.commitTransaction();
 		return true;
 	} catch(error) {
-		console.error('Unexpected error creating user: ', error);
+		await session.abortTransaction();
+
+		if (error.message.startsWith('Creation Error')){
+			console.error(error.message);
+		} else if (error.message.startsWith('Update Error')){
+			console.error(error.message);
+		} else {
+			console.error('Unexpected error creating user: ', error);
+		}
+
 		return false;
+	} finally {
+		session.endSession();
 	}
 }
 
@@ -123,9 +168,10 @@ async function updateOneUser(email, userUpdateData) {
 			throw new Error(`Document Not Found: No document found for ${email} to update.`);
 		}
 
+		// Update the user document and retrieve the updated version.
 		const updatedUser = await User.findOneAndUpdate({email}, {$set: userUpdateData}, {new: true});
 
-		// Take the keys from userUpdateData as references to compare the keys from the original and updated data. Returns true if a difference is found, otherwise returns false.
+		// Check if any modifications were made by comparing keys in userUpdateData
 		const isModified = !Object.keys(userUpdateData).every(key => {
 			return JSON.stringify(updatedUser[key]) === JSON.stringify(originalUser[key]);
 		});
@@ -134,6 +180,7 @@ async function updateOneUser(email, userUpdateData) {
 			throw new Error('Update Error: No modifications made the data is the same.');
 		}
 
+		// Handle added tags.
 		const addedTags = updatedUser.interestedTags.filter(tag => !originalUser.interestedTags.includes(tag));
 
 		if (addedTags.length > 0){
@@ -146,6 +193,7 @@ async function updateOneUser(email, userUpdateData) {
 			}
 		}
 
+		// Handle removed tags.
 		const removedTags = originalUser.interestedTags.filter(tag => !updatedUser.interestedTags.includes(tag));
 
 		if (removedTags.length > 0 ){

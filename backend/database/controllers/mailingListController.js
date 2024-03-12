@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const MailingList = require('../models/mailingListModel');
 
 // TODO Create documentation

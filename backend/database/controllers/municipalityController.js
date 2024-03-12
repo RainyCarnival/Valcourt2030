@@ -3,7 +3,7 @@ const Municipality = require('../models/municipalityModel');
 
 async function getOneMunicipality(municipalityToFind){
 	try {
-		const municipality = await Municipality.findOne(municipalityToFind);
+		const municipality = await Municipality.findOne({municipality: {$regex: municipalityToFind, $options: 'i'}});
 
 		if(municipality){
 			return municipality;
