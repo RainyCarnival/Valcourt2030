@@ -2,9 +2,10 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 /**
- * Method to connect to the MongoDB database.
- * 
- * @returns {boolean} Returns false if the MONGO_URL and DATABASE are not specified.
+ * Connects to the MongoDB database using Mongoose.
+ *
+ * @returns {boolean} - Returns true if the connection is successful, false otherwise.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the connection process.
  */
 async function connectToDatabase() {
 	try {
