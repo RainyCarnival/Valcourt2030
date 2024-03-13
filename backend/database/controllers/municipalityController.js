@@ -1,4 +1,6 @@
+const { default: mongoose } = require('mongoose');
 const Municipality = require('../models/municipalityModel');
+const { globalDefaultMunicipality } = require('../../globals');
 
 /**
  * Retrieves a municipality based on the specified criteria.
@@ -14,6 +16,13 @@ async function getOneMunicipality(municipalityToFind){
 
 		if(municipality){
 			return municipality;
+		} else if (municipalityToFind.toLowerCase() === globalDefaultMunicipality) {
+			// Create default Municipality if it does not exist.
+			const result = await Municipality.create({municipality: globalDefaultMunicipality});
+
+			if (result){
+				return result;
+			}
 		} else {
 			console.error('Municipality not found.');
 			return false;
@@ -59,7 +68,7 @@ async function createOneMunicipality(newMunicipality){
 		const isExisting = await Municipality.findOne({ municipality: {$regex: newMunicipality, $options: 'i'} });
 
 		if (!isExisting){
-			await Municipality.create({ tag: newMunicipality });
+			await Municipality.create({ municipality: newMunicipality });
 			return true;
 		} else {
 			console.log('Municipality already exists.');
@@ -76,20 +85,63 @@ async function createOneMunicipality(newMunicipality){
 	}
 }
 
-// TODO Update users to default municipality if theirs is deleted.
+/**
+ * Asynchronously deletes a municipality and updates associated users with a new municipality.
+ *
+ * @param {string} municipalityToDelete - The name of the municipality to delete.
+ * @returns {Promise<boolean>} A Promise that resolves to true if the deletion is successful, false otherwise.
+ */
 async function deleteOneMunicipality(municipalityToDelete){
+	const { getAllUsers, updateOneUser } = require('./userController');
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
 	try {
-		const result = await Municipality.deleteOne({ municipality: municipalityToDelete });
-    
-		if (result.deletedCount > 0){
-			return true;
-		} else {
-			console.error('No matching municipalities to delete.');
-			return false;
+		if (municipalityToDelete.toLowerCase() === globalDefaultMunicipality.toLowerCase()){
+			throw new Error('Deletion Error: Cannot delete default Municipality.');
 		}
+		const deletedMunicipality = await Municipality.findOneAndDelete({ municipality: municipalityToDelete });
+    
+		if (!deletedMunicipality){
+			throw new Error(`Deletion Error: Could not find ${municipalityToDelete} to delete.`);
+		}
+
+		const users = await getAllUsers();
+		
+		if (!users){
+			throw new Error('Deletion Error: Failed to retrieve all users');
+		}
+
+		// Filter users associated with the deleted municipality
+		const usersToUpdate = users.filter(user => user.municipality === null);
+
+		// Update users with the default municipality
+		if (usersToUpdate.length > 0){
+			const newMunicipality = await Municipality.findOne({municipality: globalDefaultMunicipality});
+
+			for (const user of usersToUpdate){
+				const updatedUserResult = await updateOneUser(user.email, {municipality: newMunicipality});
+
+				if (!updatedUserResult){
+					throw new Error(`Deletion Error: Failed to update the municipality of user: ${user.email}`);
+				}
+			}
+		}
+
+		session.commitTransaction();
+		return true;
+
 	} catch (error) {
-		console.error('Unexpected error deleting municipality: ', error);
-		throw error;
+		session.abortTransaction();
+		if (error.message.startsWith('Deletion Error')){
+			console.error(error.message);
+		} else {
+			console.error('Unexpected error deleting municipality: ', error);
+		}
+
+		return false;
+	} finally {
+		session.endSession();
 	}
 }
 
