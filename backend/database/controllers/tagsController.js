@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Tag = require('../models/tagsModel');
 
 /**
@@ -46,26 +47,54 @@ async function getAllTags(){
 	}
 }
 
+/**
+ * Creates a new tag in the system.
+ *
+ * @param {string} newTag - The name of the new tag to be created.
+ * @returns {boolean} - Returns true if the tag creation process is successful, otherwise returns false.
+ * @throws {Error} - Throws an error with the message 'Creation Error: Tag already exists.' if the tag already exists in the system.
+ *                   Throws an error with the message 'Creation Error: Failed to create tag.' if the tag creation process fails.
+ *                   Throws an error with the message 'Creation Error: Failed to create mailing list for the new tag.' if the mailing list creation process fails.
+ *                   Logs unexpected errors encountered during the process.
+ */
 async function createOneTag(newTag){
+	const { createOneMailingList } = require('./mailingListController');
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
 	try{        
 		const isExisting = await Tag.findOne({ tag: {$regex: newTag, $options: 'i'} });
 
-		if (!isExisting){
-			const createdTag = await Tag.create({ tag: newTag });
-			// TODO: createOneMailingList(createdTag._id);
-			return true;
-		} else {
-			console.log('Tag already exists.');
-			return false;
+		if (isExisting){
+			throw new Error('Creation Error: Tag already exists.');
 		}
+
+		const createdTag = await Tag.create({ tag: newTag });
+
+		if (!createdTag) {
+			throw new Error('Creation Error: Failed to create tag.');
+		}
+		
+		const result = await createOneMailingList(createdTag._id);
+
+		if (!result) {
+			throw new Error('Creation Error: Failed to create mailing list for the new tag.');
+		}
+
+		session.commitTransaction();
+		return true;
 	} catch (error) {
-		if (error.name === 'MongoError' && error.code === 11000) {
-			console.error('Tag already exists. Duplicate key violation.');
-			return false;
+		session.abortTransaction();
+
+		if (error.message.startsWith('Creation Error')) {
+			console.error(error.message);
 		} else {
 			console.error('Unexpected error creating tag: ', error);
-			throw error;
 		}
+
+		return false;
+	} finally {
+		session.endSession();
 	}
 }
 

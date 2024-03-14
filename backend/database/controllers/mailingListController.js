@@ -9,7 +9,7 @@ const MailingList = require('../models/mailingListModel');
  */
 async function createOneMailingList(mailingTagId){
 	try {
-		const isExisting = await MailingList.findOne({ tag: {$regex: mailingTagId, $options: 'i'} });
+		const isExisting = await MailingList.findOne({ tag: mailingTagId });
 
 		// If no existing mailing list, create a new one
 		if (!isExisting){

@@ -307,7 +307,7 @@ async function getOneUser(userEmail){
  */
 async function getAllUsers(){
 	try{
-		const users = await User.find({}).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
+		const users = await User.find({}).populate([{path: 'interestedTags'}, {path: 'municipality', select: '_id municipality'}]);
 
 		if(users.length === 0){
 			console.warn('No users found.');
