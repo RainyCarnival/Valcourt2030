@@ -1,9 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Form, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png'; // Ensure the logo path is correct
 import Background from '../components/Background';
+import axios from 'axios';
+import { allMunicipalitiesRoute } from '../utils/APIRoutes';
 
 export default function SignUpPage() {
   const errorBackground = '#f7d6db'
@@ -27,13 +29,28 @@ export default function SignUpPage() {
     confirmPassword: true,
   }
 
+const [municipalities, setMunicipalities] = useState([]);
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState(null);
   const [valid, setValid] = useState(initialValid);
 
+  useEffect(() => {
+    getAllMunicipalities()
+    console.log(municipalities)
+  }, [])
+
+  const getAllMunicipalities = async () => {
+    const { data } = await axios.get(allMunicipalitiesRoute);
+    console.log(data)
+    if (data.status){
+      setMunicipalities(data.municipalities);
+    }
+    
+  };
+
   const handlePrevious = () => {
     navigate('/login', {replace: true});
-  }
+  };
 
   const validateField = (fieldName, value) => {
     setValid((prevValid) => ({ ...prevValid, [fieldName]: !!value }));
@@ -142,18 +159,15 @@ export default function SignUpPage() {
             // TODO Make the municipality list dynamic pulling values from the database
             >
                 <option value="" disabled>Choisir une municipalité</option>
-                <option value="Valcourt">Valcourt</option>
-                <option value="Canton de Valcourt">Canton de Valcourt</option>
-                <option value="Bonsecours">Bonsecours</option>
-                <option value="Lawrenceville">Lawrenceville</option>
-                <option value="Maricourt">Maricourt</option>
-                <option value="Racine">Racine</option>
-                <option value="Sainte-Anne-de-la-Rochelle">Sainte-Anne-de-la-Rochelle</option>
-                <option value="MRC du Val-Saint-François">MRC du Val-Saint-François</option>
-                <option value="Estrie">Estrie</option>
-                <option value="Province de Québec">Province de Québec</option>
-                <option value="Canada">Canada</option>
-                <option value="Autre">Autre</option>
+                {municipalities.map((municipality) => (
+                  <option
+                    key={municipality._id}
+                    id={`municipality-${municipality.municipality}`}
+                    value={municipality._id}
+                  >
+                    {municipality.municipality}
+                  </option>
+                ))}
               </Form.Select>
             </Form.Group>
 
