@@ -9,7 +9,7 @@ const MailingList = require('../models/mailingListModel');
  */
 async function createOneMailingList(mailingTagId){
 	try {
-		const isExisting = await MailingList.findOne({ tag: {$regex: mailingTagId, $options: 'i'} });
+		const isExisting = await MailingList.findOne({ tag: mailingTagId });
 
 		// If no existing mailing list, create a new one
 		if (!isExisting){
@@ -112,14 +112,14 @@ async function getOneMailingList(mailingTagId){
 /**
  * Deletes a mailing list based on the specified tag.
  *
- * @param {string} mailingTagId - The tag identifier for the mailing list.
+ * @param {string} tagId - The tag identifier for the mailing list.
  * @returns {boolean} - Returns true if the deletion is successful, false otherwise.
  * @throws {Error} - Throws an error if an unexpected error occurs during the process.
  */
-async function deleteOneMailingList(mailingTagId){
+async function deleteOneMailingList(tagId){
 	try {
 		// Perform the deletion of the mailing list based on the specified tag
-		const result = await MailingList.deleteOne(mailingTagId);
+		const result = await MailingList.deleteOne({ tag: tagId });
 
 		if (result.deletedCount > 0){
 			return true;
