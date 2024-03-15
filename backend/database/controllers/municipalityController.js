@@ -134,7 +134,7 @@ async function deleteOneMunicipality(municipalityToDelete){
 	} catch (error) {
 		session.abortTransaction();
 		if (error.message.startsWith('Deletion Error')){
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error deleting municipality: ', error);
 		}

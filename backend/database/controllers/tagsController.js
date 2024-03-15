@@ -1,5 +1,7 @@
-const { default: mongoose } = require('mongoose');
+const { default: mongoose, Error } = require('mongoose');
 const Tag = require('../models/tagsModel');
+const { getAllUsers, updateOneUser } = require('./userController');
+const { createOneMailingList, deleteOneMailingList } = require('./mailingListController');
 
 /**
  * Retrieves a tag based on the specified criteria.
@@ -58,7 +60,6 @@ async function getAllTags(){
  *                   Logs unexpected errors encountered during the process.
  */
 async function createOneTag(newTag){
-	const { createOneMailingList } = require('./mailingListController');
 	const session = await mongoose.startSession();
 	session.startTransaction();
 
@@ -87,7 +88,7 @@ async function createOneTag(newTag){
 		session.abortTransaction();
 
 		if (error.message.startsWith('Creation Error')) {
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error creating tag: ', error);
 		}
@@ -98,20 +99,78 @@ async function createOneTag(newTag){
 	}
 }
 
+/**
+ * Deletes a tag from the database and updates associated user data and mailing lists.
+ * @param {string} tagIdToDelete - The ID of the tag to delete.
+ * @returns {Promise<boolean>} A Promise that resolves to true if the tag is successfully deleted,
+ * or false if there is an error during the deletion process.
+ */
 async function deleteOneTag(tagIdToDelete){
+	const session = await mongoose.startSession();
+	session.startTransaction();
+
 	try {
-		const result = await Tag.deleteOne({ _id: tagIdToDelete });
-    
-		if (result.deletedCount > 0){
-			// TODO: Trigger a call to the Mailing List and Users tables to update the info accordingly
-			return true;
-		} else {
-			console.error('No matching tags to delete.');
-			return false;
+
+
+		if (!await Tag.findOne({ _id: tagIdToDelete })){
+			throw new Error('Deletion Error: Failed to find the tag to delete.');
 		}
+
+		// Handle updating the users.
+		let users = await getAllUsers();
+
+		if (!users) {
+			throw new Error('Deletion Error: Failed to get all the users.');
+		}
+
+		users = users.filter(user => {
+			if (user.interestedTags.some(tagObj => tagObj._id.toString() === tagIdToDelete.toString())) {
+				user.interestedTags = user.interestedTags.filter(tagObj => tagObj._id.toString() !== tagIdToDelete.toString());
+				return true;
+			}
+
+			return false;
+		});
+
+		if (users.length > 0){
+			for (const user of users){
+				const usersResult = await updateOneUser(user.email, user);
+				
+				if (!usersResult){
+					throw new Error('Deletion Error: Failed to removed tag from users.');
+				}
+			}
+		}
+
+
+		// Handle deleting the mailing list.
+		const mailingListResult = await deleteOneMailingList(tagIdToDelete);
+
+		if (mailingListResult.deletedCount === 0){
+			throw new Error('Deletion Error: Failed to delete the corresponding mailing list.');
+		}
+
+		// Handle deleting the tag.
+		const tagResult = await Tag.deleteOne({ _id: tagIdToDelete });
+    
+		if (tagResult.deletedCount === 0){
+			throw new Error('Deletion Error: Failed to delete the tag.');
+		}
+
+		session.commitTransaction();
+		return true;
 	} catch (error) {
-		console.error('Unexpected error deleting tag: ', error);
-		throw error;
+		session.abortTransaction();
+
+		if(error.message.startsWith('Deletion Error')){
+			console.error(error);
+		} else {
+			console.error('Unexpected error deleting tag: ', error);
+		}
+
+		return false;
+	} finally {
+		session.endSession();
 	}
 }
 

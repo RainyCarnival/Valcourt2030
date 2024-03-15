@@ -94,9 +94,9 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		await session.abortTransaction();
 
 		if (error.message.startsWith('Creation Error')){
-			console.error(error.message);
+			console.error(error);
 		} else if (error.message.startsWith('Update Error')){
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error creating user: ', error);
 		}
@@ -211,9 +211,9 @@ async function updateOneUser(email, userUpdateData) {
 		await session.abortTransaction();
 
 		if (error.message.startsWith('Document Not Found')){
-			console.error(error.message);
+			console.error(error);
 		} else if (error.message.startsWith('Update Error')) {
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('An unexpected error occured when updated user data: ', error);
 		}
@@ -265,7 +265,7 @@ async function deleteOneUser(userEmail) {
 	} catch (error) {
 		session.abortTransaction();
 		if(error.message.startsWith('Deletion Error')){
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error occured deleting the user: ', error);
 		}
