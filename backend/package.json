@@ -7,12 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test-all": "jest",
+    "test-controllers": "jest jest/controllers/"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/mongoose": "^5.11.97",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.4",
@@ -23,7 +24,6 @@
     "nodemon": "^3.0.3"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "mongodb-memory-server": "^9.1.7",
