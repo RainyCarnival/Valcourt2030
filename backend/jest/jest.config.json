@@ -1,6 +1,5 @@
 {
 	"jest": {
-		"testEnvironment": "node",
-		"setupFilesAfterEnv": ["./jest.setup.js"]
+		"testEnvironment": "node"
 	}
 }
