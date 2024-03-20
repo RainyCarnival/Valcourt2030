@@ -2,6 +2,7 @@ const { default: mongoose, Error } = require('mongoose');
 const Tag = require('../models/tagsModel');
 const { getAllUsers, updateOneUser } = require('./userController');
 const { createOneMailingList, deleteOneMailingList } = require('./mailingListController');
+const { getAllEvents, updateOneEvent } = require('./eventsController');
 
 /**
  * Retrieves a tag based on the specified criteria.
@@ -111,7 +112,6 @@ async function deleteOneTag(tagIdToDelete){
 
 	try {
 
-
 		if (!await Tag.findOne({ _id: tagIdToDelete })){
 			throw new Error('Deletion Error: Failed to find the tag to delete.');
 		}
@@ -142,6 +142,31 @@ async function deleteOneTag(tagIdToDelete){
 			}
 		}
 
+		// Handle updating the events.
+		let events = await getAllEvents();
+
+		if (!events) {
+			throw new Error('Deletion Error: Failed to get all the events.');
+		}
+
+		events = events.filter(event => {
+			if (event.tags.some(tagObj => tagObj._id.toString() === tagIdToDelete.toString())) {
+				event.tags = event.tags.filter(tagObj => tagObj._id.toString() !== tagIdToDelete.toString());
+				return true;
+			}
+
+			return false;
+		});
+
+		if (events.length > 0){
+			for (const event of events){
+				const eventsResult = await updateOneEvent(event.eventId, event);
+				
+				if (!eventsResult){
+					throw new Error('Deletion Error: Failed to removed tag from events.');
+				}
+			}
+		}
 
 		// Handle deleting the mailing list.
 		const mailingListResult = await deleteOneMailingList(tagIdToDelete);
