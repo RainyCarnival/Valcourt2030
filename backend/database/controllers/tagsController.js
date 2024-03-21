@@ -13,18 +13,16 @@ const { getAllEvents, updateOneEvent } = require('./eventsController');
  */
 async function getOneTag(tagToFind){
 	try {
-		const tag = await Tag.findOne(tagToFind);
+		const tag = await Tag.findOne({tag: tagToFind});
 
-		if(tag){
-			return tag;
-		} else {
+		if(!tag){
 			console.error('Tag not found.');
-			return false;
 		}
+
+		return tag;
 
 	} catch (error) {
 		console.error('Unexpected error retreiving the tag: ', error);
-		throw error;
 	}
 }
 
@@ -39,14 +37,13 @@ async function getAllTags(){
 		const tags = await Tag.find({});
 
 		if(tags.length === 0){
-			console.warn('No tags found.');
+			console.error('No tags found.');
 		}
 
 		return tags;
 
 	} catch (error) {
 		console.error('Unexpected error retreiving the list of tags: ', error);
-		throw error;
 	}
 }
 
@@ -77,10 +74,10 @@ async function createOneTag(newTag){
 			throw new Error('Creation Error: Failed to create tag.');
 		}
 		
-		const result = await createOneMailingList(createdTag._id);
+		const createdMailingList = await createOneMailingList(createdTag._id);
 
-		if (!result) {
-			throw new Error('Creation Error: Failed to create mailing list for the new tag.');
+		if (!createdMailingList) {
+			throw new Error('Creation Error: Failed to create mailing list.');
 		}
 
 		session.commitTransaction();
@@ -203,29 +200,34 @@ async function deleteOneTag(tagIdToDelete){
  * Updates a tag based on the current tag value.
  *
  * @param {string} currentTag - The current tag value to identify the tag for update.
- * @param {string} tagUpdateData - The new tag value to set.
+ * @param {string} newTag - The new tag value to set.
  * @returns {boolean} - Returns true if the update is successful, false otherwise.
  * @throws {Error} - Throws an error if an unexpected error occurs during the process.
  */
-async function updateTag(currentTag, tagUpdateData) {
+async function updateTag(currentTag, newTag) {
 	try{
-		// Update the tag based on the current tag value
-		const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: tagUpdateData }});
+		const dupe = await Tag.findOne({ tag: newTag});
 
-		if(result.n > 0){
-			return true;
-		} else {
-			console.error('No matching tags to update.');
-			return false;
+		if (dupe){
+			throw new Error('Update Error: New tag already exists.');
 		}
+		
+		// Update the tag based on the current tag value
+		const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: newTag }});
+
+		if(result.modifiedCount <= 0){
+			throw new Error('Update Error: No matching tags to update.');
+		}
+
+		return true;
+
 	} catch (error) {
-		if (error.name === 'MongoError' && error.code === 11000) {
-			console.error('Update failed due to duplicate tag value.');
-			return false;
+		if (error.message.startsWith('Update Error')){
+			console.error(error);
 		} else {
 			console.error('Unexpected error updating the tag: ', error);
-			throw error;
 		}
+		return false;
 	}
 }
 
