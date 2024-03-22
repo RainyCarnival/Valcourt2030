@@ -136,7 +136,10 @@ async function loginUser(email, password) {
 		const verify = await bcrypt.compare(password, user.password);
 
 		if(verify){
-			return true;
+			return {
+				success: true,
+				user
+			};
 		}
 		else{
 			console.log('Password validation failure.');

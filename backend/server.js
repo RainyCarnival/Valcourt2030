@@ -48,9 +48,9 @@ connectToDatabase().then(() => {
     
 	app.use(standardAuth);
     
-	app.get('/', (req, res) => {
+	app.get('/authTest', (req, res) => {
 		res.status(200).send({
-			message: 'Server is running.',
+			message: 'You are authorized.',
 			status: true
 		});
 	});
