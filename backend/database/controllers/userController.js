@@ -2,8 +2,7 @@ const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const { updateOneMailingList } = require('./mailingListController');
-const { getOneMunicipality } = require('./municipalityController');
-
+const { globalDefaultMunicipality } = require('../../globals');
 
 /**
  * Checks if the given email is unique in the User collection.
@@ -37,6 +36,7 @@ async function isEmailUnique(email) {
  * @returns {boolean} - Returns true if the registration is successful, false otherwise.
  */
 async function registerUser(userInfo, isAdmin = false, isValidated = false) {
+	const { getOneMunicipality } = require('./municipalityController');
 	const session = await mongoose.startSession();
 	session.startTransaction();
 
@@ -55,11 +55,10 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		
 		// Set a default municipality if not provided
 		if(!userInfo.municipality){
-			const defaultMunicipality = await getOneMunicipality('autre');
-			console.log(defaultMunicipality);
+			const municipality = await getOneMunicipality(globalDefaultMunicipality);
 			
-			if(defaultMunicipality){
-				userInfo.municipality = defaultMunicipality._id;
+			if(municipality){
+				userInfo.municipality = municipality._id;
 			}
 		}
 
@@ -95,9 +94,9 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		await session.abortTransaction();
 
 		if (error.message.startsWith('Creation Error')){
-			console.error(error.message);
+			console.error(error);
 		} else if (error.message.startsWith('Update Error')){
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error creating user: ', error);
 		}
@@ -215,9 +214,9 @@ async function updateOneUser(email, userUpdateData) {
 		await session.abortTransaction();
 
 		if (error.message.startsWith('Document Not Found')){
-			console.error(error.message);
+			console.error(error);
 		} else if (error.message.startsWith('Update Error')) {
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('An unexpected error occured when updated user data: ', error);
 		}
@@ -269,7 +268,7 @@ async function deleteOneUser(userEmail) {
 	} catch (error) {
 		session.abortTransaction();
 		if(error.message.startsWith('Deletion Error')){
-			console.error(error.message);
+			console.error(error);
 		} else {
 			console.error('Unexpected error occured deleting the user: ', error);
 		}
@@ -289,7 +288,7 @@ async function deleteOneUser(userEmail) {
  */
 async function getOneUser(userEmail){
 	try {
-		const user = await User.findOne(userEmail).populate(['interestedTags', 'municipality']);
+		const user = await User.findOne(userEmail).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
 
 		if(user){
 			return user;
@@ -311,7 +310,7 @@ async function getOneUser(userEmail){
  */
 async function getAllUsers(){
 	try{
-		const users = await User.find({}).populate(['interestedTags', 'municipality']);
+		const users = await User.find({}).populate([{path: 'interestedTags'}, {path: 'municipality', select: '_id municipality'}]);
 
 		if(users.length === 0){
 			console.warn('No users found.');
