@@ -48,8 +48,7 @@ async function updateOneMailingList(tagId, action, userId){
 		const existingMailingList = await MailingList.findOne({ tag: tagId });
 
 		if (!existingMailingList){
-			console.error('No matching mailing list found.');
-			return false;
+			throw new Error('Update Error: No matching mailing list found.');
 		}
 
 		// Perform the specified action (add or remove) on the mailing list
@@ -69,24 +68,27 @@ async function updateOneMailingList(tagId, action, userId){
 			}
 			
 			existingMailingList.users = existingMailingList.users.filter(user => !user.equals(userId));
-
 			break;
 		default:
-			console.error('Invalid action specified');
-			return false;
+			throw new Error('Update Error: Invalid action specified');
 		}
 
 		const result = await existingMailingList.save();
 
-		if(result){
-			return true;
-		} else {
-			console.error('No modifications were made to the mailing list.');
-			return false;
+		if(!result){
+			throw new Error('Update Error: No modifications were made to the mailing list.');
 		}
+
+		return true;
+
 	} catch (error) {
-		console.error(`An unexpected error occured updating the mailing list: ${error}`);
-		throw error;
+		if(error.message.startsWith('Update Error')){
+			console.error(error);
+		} else {
+			console.error(`An unexpected error occured updating the mailing list: ${error}`);
+		}
+
+		return false;
 	}
 }
 
@@ -100,7 +102,7 @@ async function updateOneMailingList(tagId, action, userId){
 async function getOneMailingList(mailingTagId){
 	try {
 		// Find a mailing list based on the specified tag and populate associated fields
-		const mailingList = await MailingList.findOne({tag: mailingTagId}).populate(['tag', 'users']);
+		const mailingList = await MailingList.findOne({tag: mailingTagId});
 
 		if (mailingList){
 			return mailingList;
@@ -109,7 +111,6 @@ async function getOneMailingList(mailingTagId){
 		}
 	} catch (error) {
 		console.error(`An unexpected error occured getting the mailing list: ${error}`);
-		throw error;
 	}
 }
 

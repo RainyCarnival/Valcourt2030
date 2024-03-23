@@ -1,4 +1,3 @@
-// Import necessary modules and setup files
 const { test, expect } = require('@jest/globals');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
@@ -320,7 +319,7 @@ describe('Tag Controller - deleteOneTag', () => {
 	// FIXME findOne not returning the mocked result
 	// test('should handle failed tag deletion from users', async() => {
 	// 	const tag = await deleteTagSetup();
-	// 	const updateUsersMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(null);
+	// 	const updateUsersMock = jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('Mocked error: failed to find one user.'));
 	// 	const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 	// 	const result = await TagsController.deleteOneTag(tag);
