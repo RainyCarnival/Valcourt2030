@@ -12,21 +12,25 @@ async function createOneMailingList(mailingTagId){
 		const isExisting = await MailingList.findOne({ tag: mailingTagId });
 
 		// If no existing mailing list, create a new one
-		if (!isExisting){
-			await MailingList.create({ tag: mailingTagId});
-			return true;
-		} else {
-			console.error('Mailing list already exists');
-			return false;
+		if (isExisting){
+			throw new Error('Creation Error: Mailing list already exists');
 		}
+		
+		const result = await MailingList.create({ tag: mailingTagId});
+		
+		if (!result) {
+			throw new Error('Creation Error: Failed to create mailing list.');
+		}
+		
+		return true;
+
 	} catch (error) {
-		if (error.name === 'MongoError' && error.code === 11000) {
-			console.error('Mailing list already exists. Duplicate key violation.');
-			return false;
+		if (error.message.startsWith('Creation Error')) {
+			console.error(error);
 		} else {
-			console.error('Unexpected error creating mailing list: ', error);
-			throw error;
+			console.error(`Unexpected error creating mailing list: ${error}`);
 		}
+		return false;
 	}
 }
 
@@ -81,7 +85,7 @@ async function updateOneMailingList(tagId, action, userId){
 			return false;
 		}
 	} catch (error) {
-		console.error('An unexpected error occured updating the mailing list: ', error);
+		console.error(`An unexpected error occured updating the mailing list: ${error}`);
 		throw error;
 	}
 }
@@ -96,7 +100,7 @@ async function updateOneMailingList(tagId, action, userId){
 async function getOneMailingList(mailingTagId){
 	try {
 		// Find a mailing list based on the specified tag and populate associated fields
-		const mailingList = await MailingList.findOne(mailingTagId).populate(['tag', 'users']);
+		const mailingList = await MailingList.findOne({tag: mailingTagId}).populate(['tag', 'users']);
 
 		if (mailingList){
 			return mailingList;
@@ -104,7 +108,7 @@ async function getOneMailingList(mailingTagId){
 			console.error('Mailing list not found.');
 		}
 	} catch (error) {
-		console.error('An unexpected error occured getting the mailing list: ', error);
+		console.error(`An unexpected error occured getting the mailing list: ${error}`);
 		throw error;
 	}
 }
@@ -120,16 +124,20 @@ async function deleteOneMailingList(tagId){
 	try {
 		// Perform the deletion of the mailing list based on the specified tag
 		const result = await MailingList.deleteOne({ tag: tagId });
-
-		if (result.deletedCount > 0){
-			return true;
-		} else {
-			console.error('No mathing mailing list to delete.');
-			return false;
+		if (result.deletedCount === 0){
+			throw new Error('Deletion Error: No matching mailing list to delete.');
 		}
+
+		return true;
+
 	} catch (error) {
-		console.error('An unexpected error occured deleting the mailing list: ', error);
-		throw error;
+		if(error.message.startsWith('Deletion Error')){
+			console.error(error);
+		} else {
+			console.error(`An unexpected error occured deleting the mailing list: ${error}`);
+		}
+
+		return false;
 	}
 }
 

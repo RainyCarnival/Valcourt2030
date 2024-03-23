@@ -98,6 +98,41 @@ async function createOneTag(newTag){
 }
 
 /**
+ * Updates a tag based on the current tag value.
+ *
+ * @param {string} currentTag - The current tag value to identify the tag for update.
+ * @param {string} newTag - The new tag value to set.
+ * @returns {boolean} - Returns true if the update is successful, false otherwise.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
+async function updateOneTag(currentTag, newTag) {
+	try{
+		const dupe = await Tag.findOne({ tag: newTag});
+
+		if (dupe){
+			throw new Error('Update Error: New tag already exists.');
+		}
+		
+		// Update the tag based on the current tag value
+		const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: newTag }});
+
+		if(result.modifiedCount <= 0){
+			throw new Error('Update Error: No modifications made.');
+		}
+
+		return true;
+
+	} catch (error) {
+		if (error.message.startsWith('Update Error')){
+			console.error(error);
+		} else {
+			console.error('Unexpected error updating the tag: ', error);
+		}
+		return false;
+	}
+}
+
+/**
  * Deletes a tag from the database and updates associated user data and mailing lists.
  * @param {string} tagIdToDelete - The ID of the tag to delete.
  * @returns {Promise<boolean>} A Promise that resolves to true if the tag is successfully deleted,
@@ -108,17 +143,12 @@ async function deleteOneTag(tagIdToDelete){
 	session.startTransaction();
 
 	try {
-
 		if (!await Tag.findOne({ _id: tagIdToDelete })){
 			throw new Error('Deletion Error: Failed to find the tag to delete.');
 		}
 
 		// Handle updating the users.
 		let users = await getAllUsers();
-
-		if (!users) {
-			throw new Error('Deletion Error: Failed to get all the users.');
-		}
 
 		users = users.filter(user => {
 			if (user.interestedTags.some(tagObj => tagObj._id.toString() === tagIdToDelete.toString())) {
@@ -132,19 +162,14 @@ async function deleteOneTag(tagIdToDelete){
 		if (users.length > 0){
 			for (const user of users){
 				const usersResult = await updateOneUser(user.email, user);
-				
 				if (!usersResult){
-					throw new Error('Deletion Error: Failed to removed tag from users.');
+					throw new Error('Deletion Error: Failed to remove tag from users.');
 				}
 			}
 		}
 
 		// Handle updating the events.
 		let events = await getAllEvents();
-
-		if (!events) {
-			throw new Error('Deletion Error: Failed to get all the events.');
-		}
 
 		events = events.filter(event => {
 			if (event.tags.some(tagObj => tagObj._id.toString() === tagIdToDelete.toString())) {
@@ -168,7 +193,7 @@ async function deleteOneTag(tagIdToDelete){
 		// Handle deleting the mailing list.
 		const mailingListResult = await deleteOneMailingList(tagIdToDelete);
 
-		if (mailingListResult.deletedCount === 0){
+		if (!mailingListResult){
 			throw new Error('Deletion Error: Failed to delete the corresponding mailing list.');
 		}
 
@@ -187,48 +212,12 @@ async function deleteOneTag(tagIdToDelete){
 		if(error.message.startsWith('Deletion Error')){
 			console.error(error);
 		} else {
-			console.error('Unexpected error deleting tag: ', error);
+			console.error('Unexpected error deleting tag.');
 		}
-
 		return false;
 	} finally {
 		session.endSession();
 	}
 }
 
-/**
- * Updates a tag based on the current tag value.
- *
- * @param {string} currentTag - The current tag value to identify the tag for update.
- * @param {string} newTag - The new tag value to set.
- * @returns {boolean} - Returns true if the update is successful, false otherwise.
- * @throws {Error} - Throws an error if an unexpected error occurs during the process.
- */
-async function updateTag(currentTag, newTag) {
-	try{
-		const dupe = await Tag.findOne({ tag: newTag});
-
-		if (dupe){
-			throw new Error('Update Error: New tag already exists.');
-		}
-		
-		// Update the tag based on the current tag value
-		const result = await Tag.updateOne({ tag: currentTag }, { $set: { tag: newTag }});
-
-		if(result.modifiedCount <= 0){
-			throw new Error('Update Error: No matching tags to update.');
-		}
-
-		return true;
-
-	} catch (error) {
-		if (error.message.startsWith('Update Error')){
-			console.error(error);
-		} else {
-			console.error('Unexpected error updating the tag: ', error);
-		}
-		return false;
-	}
-}
-
-module.exports = { getOneTag, getAllTags, createOneTag, deleteOneTag, updateTag };
+module.exports = { getOneTag, getAllTags, createOneTag, deleteOneTag, updateOneTag };

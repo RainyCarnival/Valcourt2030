@@ -199,7 +199,7 @@ async function updateOneUser(email, userUpdateData) {
 				const removedTagResult = await updateOneMailingList(tag, 'remove', updatedUser._id);
 				
 				if (!removedTagResult){
-					throw new Error('Update Error: Failed to remove user to the mailing list.');
+					throw new Error('Update Error: Failed to remove user from the mailing list.');
 				}				
 			}
 		}
@@ -215,7 +215,7 @@ async function updateOneUser(email, userUpdateData) {
 		} else if (error.message.startsWith('Update Error')) {
 			console.error(error);
 		} else {
-			console.error('An unexpected error occured when updated user data: ', error);
+			console.error(`An unexpected error occured when updated user data: ${error}`);
 		}
 		
 		return false;
@@ -316,8 +316,7 @@ async function getAllUsers(){
 		return users;
 
 	} catch (error) {
-		console.error('Unexpected error retreiving the list of users: ', error);
-		throw error;
+		console.error(`Unexpected error retreiving the list of users: ${error}`);
 	}
 }
 
