@@ -76,7 +76,7 @@ async function updateOneMailingList(tagId, action, userId){
 		const result = await existingMailingList.save();
 
 		if(!result){
-			throw new Error('Update Error: No modifications were made to the mailing list.');
+			throw new Error('Update Error: Failed to save updated information.');
 		}
 
 		return true;
