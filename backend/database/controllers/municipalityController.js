@@ -13,24 +13,31 @@ async function getOneMunicipality(municipalityToFind){
 	try {
 		// Find a municipality based on the specified criteria (case-insensitive)
 		const municipality = await Municipality.findOne({municipality: {$regex: municipalityToFind, $options: 'i'}});
-
-		if(municipality){
-			return municipality;
-		} else if (municipalityToFind.toLowerCase() === globalDefaultMunicipality) {
+		
+		if(!municipality && municipalityToFind.toLowerCase() === globalDefaultMunicipality.toLowerCase()){
 			// Create default Municipality if it does not exist.
-			const result = await Municipality.create({municipality: globalDefaultMunicipality});
-
-			if (result){
-				return result;
+			const defaultMunitcipality = await Municipality.create({municipality: globalDefaultMunicipality});
+			
+			if (!defaultMunitcipality){
+				throw new Error('Create Error: Failed to create default municipality.');
 			}
-		} else {
-			console.error('Municipality not found.');
-			return false;
+			
+			return defaultMunitcipality;
+
+		} else if (!municipality) {
+			throw new Error('Get Error: Municipality not found.');
 		}
 
+		return municipality;
+
 	} catch (error) {
-		console.error('Unexpected error retreiving the municipality: ', error);
-		throw error;
+		if(error.message.startsWith('Get Error') || error.message.startsWith('Create Error')){
+			console.error(error);
+		} else {
+			console.error(`Unexpected error retreiving the municipality: ${error}`);
+		}
+
+		return false;
 	}
 }
 
@@ -45,14 +52,14 @@ async function getAllMunicipalities(){
 		const municipalities = await Municipality.find({});
 
 		if(municipalities.length === 0){
-			console.warn('No municipalities found.');
+			console.error('No municipalities found.');
 		}
 
 		return municipalities;
 
 	} catch (error) {
 		console.error('Unexpected error retreiving the list of municipalities: ', error);
-		throw error;
+		return false;
 	}
 }
 
@@ -107,10 +114,6 @@ async function deleteOneMunicipality(municipalityToDelete){
 		}
 
 		const users = await getAllUsers();
-		
-		if (!users){
-			throw new Error('Deletion Error: Failed to retrieve all users');
-		}
 
 		// Filter users associated with the deleted municipality
 		const usersToUpdate = users.filter(user => user.municipality === null);
