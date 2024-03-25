@@ -151,17 +151,16 @@ async function deleteOneTag(tagIdToDelete){
 		let users = await getAllUsers();
 
 		users = users.filter(user => {
-			if (user.interestedTags.some(tagObj => tagObj._id.toString() === tagIdToDelete.toString())) {
+			if (user.interestedTags.some(tagObject => tagObject._id.toString() === tagIdToDelete.toString())) {
 				user.interestedTags = user.interestedTags.filter(tagObj => tagObj._id.toString() !== tagIdToDelete.toString());
 				return true;
 			}
-
-			return false;
 		});
 
 		if (users.length > 0){
 			for (const user of users){
-				const usersResult = await updateOneUser(user.email, user);
+				const usersResult = await updateOneUser(user.email, {interestedTags: user.interestedTags});
+
 				if (!usersResult){
 					throw new Error('Deletion Error: Failed to remove tag from users.');
 				}
@@ -176,8 +175,6 @@ async function deleteOneTag(tagIdToDelete){
 				event.tags = event.tags.filter(tagObj => tagObj._id.toString() !== tagIdToDelete.toString());
 				return true;
 			}
-
-			return false;
 		});
 
 		if (events.length > 0){
@@ -185,7 +182,7 @@ async function deleteOneTag(tagIdToDelete){
 				const eventsResult = await updateOneEvent(event.eventId, event);
 				
 				if (!eventsResult){
-					throw new Error('Deletion Error: Failed to removed tag from events.');
+					throw new Error('Deletion Error: Failed to remove tag from events.');
 				}
 			}
 		}

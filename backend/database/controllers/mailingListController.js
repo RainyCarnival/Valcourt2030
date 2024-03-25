@@ -56,7 +56,7 @@ async function updateOneMailingList(tagId, action, userId){
 		case 'add':
 			if (existingMailingList.users.includes(userId)){
 				console.error('User already in mailing list');
-				return true;
+				break;
 			}
 
 			existingMailingList.users.push(userId);
@@ -64,7 +64,7 @@ async function updateOneMailingList(tagId, action, userId){
 		case 'remove':
 			if (!existingMailingList.users.includes(userId)){
 				console.error('User not found in mailing list');
-				return true;
+				break;
 			}
 			
 			existingMailingList.users = existingMailingList.users.filter(user => !user.equals(userId));
@@ -73,8 +73,8 @@ async function updateOneMailingList(tagId, action, userId){
 			throw new Error('Update Error: Invalid action specified');
 		}
 
-		const result = await existingMailingList.save();
-
+		const result = await MailingList.updateOne({_id: existingMailingList._id}, {$set: existingMailingList});
+		
 		if(!result){
 			throw new Error('Update Error: Failed to save updated information.');
 		}

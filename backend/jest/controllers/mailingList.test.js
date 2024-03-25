@@ -220,25 +220,24 @@ describe('MailingListController - updateOneMailingList', () => {
 		consoleErrorMock.mockRestore();
 	});
 
-	// FIXME
-	// test('should handle a failed mailing list update', async() => {
-	// 	const mailingListFindOneMock = jest.spyOn(MailingList, 'save').mockResolvedValueOnce(false);
-	// 	const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
-	// 	const newTag = 'test';
-	// 	const tag = await Tag.create({tag: newTag});
-	// 	testUser.interestedTags = tag._id;
-	// 	const user = await User.create(testUser);
-	// 	const list = await MailingList.create({tag: tag._id});
-		
-	// 	const result = await MailingListController.updateOneMailingList(list.tag, 'add', user._id);
-	// 	const errorMessage = console.error.mock.calls.toString();
+	test('should handle a failed mailing list update', async() => {
+		const mailingListFindOneMock = jest.spyOn(MailingList, 'updateOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		const newTag = 'test';
+		const tag = await Tag.create({tag: newTag});
+		testUser.interestedTags = tag._id;
+		const user = await User.create(testUser);
+		const list = await MailingList.create({tag: tag._id});
 
-	// 	expect(result).toBe(false);
-	// 	expect(errorMessage).toEqual(expect.stringContaining('Failed to save updated information'));
+		const result = await MailingListController.updateOneMailingList(list.tag, 'add', user._id);
+		const errorMessage = console.error.mock.calls.toString();
 
-	// 	consoleErrorMock.mockRestore();
-	// 	mailingListFindOneMock.mockRestore();
-	// });
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to save updated information'));
+
+		consoleErrorMock.mockRestore();
+		mailingListFindOneMock.mockRestore();
+	});
 
 	test('should handle an unexpected error', async() => {
 		const mailingListFindOneMock = jest.spyOn(MailingList, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));

@@ -160,7 +160,7 @@ async function updateOneUser(email, userUpdateData) {
 	session.startTransaction();
 
 	try{
-		const originalUser = await User.findOne({email});
+		const originalUser = await User.findOne({email: email});
 
 		if(!originalUser){
 			throw new Error(`Document Not Found: No document found for ${email} to update.`);

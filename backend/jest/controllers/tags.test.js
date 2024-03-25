@@ -78,7 +78,7 @@ afterEach(async() => {
 describe('Tag Controller - createOneTag', () => {
 	test('should create a new tag.', async() => {
 		const newTag = 'test';
-	
+
 		await TagsController.createOneTag(newTag);
 	
 		const createdTag = await Tag.findOne({ tag: newTag });
@@ -316,44 +316,42 @@ describe('Tag Controller - deleteOneTag', () => {
 		consoleErrorMock.mockRestore();
 	});
 
-	// FIXME findOne not returning the mocked result
-	// test('should handle failed tag deletion from users', async() => {
-	// 	const tag = await deleteTagSetup();
-	// 	const updateUsersMock = jest.spyOn(User, 'findOne').mockRejectedValueOnce(new Error('Mocked error: failed to find one user.'));
-	// 	const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+	test('should handle failed tag deletion from users', async() => {
+		const tag = await deleteTagSetup();
+		const findOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-	// 	const result = await TagsController.deleteOneTag(tag);
-	// 	const errorMessage = console.error.mock.calls.toString();
+		const result = await TagsController.deleteOneTag(tag._id);
+		const errorMessage = console.error.mock.calls.toString();
 
-	// 	expect(result).toBe(false);
-	// 	expect(errorMessage).toEqual(expect.stringContaining('Failed to remove tag from users'));
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to remove tag from users'));
 
-	// 	updateUsersMock.mockRestore();
-	// 	consoleErrorMock.mockRestore();
-	// });
+		findOneMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 
-	// FIXME findOne not returning the mocked result
-	// test('should handle failed tag deletion from events', async() => {
-	// 	const tag = await deleteTagSetup();
-	// 	const updateEventsMock = jest.spyOn(Event, 'findOne').mockResolvedValueOnce(null);
-	// 	const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+	test('should handle failed tag deletion from events', async() => {
+		const tag = await deleteTagSetup();
+		const updateEventsMock = jest.spyOn(Event, 'findOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-	// 	const result = await TagsController.deleteOneTag(tag);
-	// 	const errorMessage = console.error.mock.calls.toString();
+		const result = await TagsController.deleteOneTag(tag._id);
+		const errorMessage = console.error.mock.calls.toString();
 
-	// 	expect(result).toBe(false);
-	// 	expect(errorMessage).toEqual(expect.stringContaining('Failed to remove tag from events'));
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to remove tag from events'));
 
-	// 	updateEventsMock.mockRestore();
-	// 	consoleErrorMock.mockRestore();
-	// });
+		updateEventsMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 
 	test('should handle failed mailing list deletion', async() => {
 		const tag = await deleteTagSetup();
 		const deleteMailingListMock = jest.spyOn(MailingList, 'deleteOne').mockReturnValue({deletedCount: 0});
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-		const result = await TagsController.deleteOneTag(tag);
+		const result = await TagsController.deleteOneTag(tag._id);
 		const errorMessage = console.error.mock.calls.toString();
 
 		expect(result).toBe(false);
@@ -368,7 +366,7 @@ describe('Tag Controller - deleteOneTag', () => {
 		const updateUsersMock = jest.spyOn(Tag, 'deleteOne').mockReturnValue({deletedCount: 0});
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-		const result = await TagsController.deleteOneTag(tag);
+		const result = await TagsController.deleteOneTag(tag._id);
 		const errorMessage = console.error.mock.calls.toString();
 
 		expect(result).toBe(false);
@@ -383,7 +381,7 @@ describe('Tag Controller - deleteOneTag', () => {
 		const tagDeleteOneMock = jest.spyOn(Tag, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in updateOne.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-		const result = await TagsController.deleteOneTag(tag);
+		const result = await TagsController.deleteOneTag(tag._id);
 		const errorMessage = console.error.mock.calls.toString();
 
 		expect(result).toBe(false);

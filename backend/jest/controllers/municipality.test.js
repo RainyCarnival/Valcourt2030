@@ -2,7 +2,6 @@ const { test, expect } = require('@jest/globals');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const Tag = require('../../database/models/tagsModel');
-const MailingList = require('../../database/models/mailingListModel');
 const User = require('../../database/models/userModel');
 const Municipality = require('../../database/models/municipalityModel');
 const MunicipalityController = require('../../database/controllers/municipalityController');
@@ -34,7 +33,6 @@ afterAll(async() => {
 
 // Clean up the database
 afterEach(async() => {
-	await MailingList.deleteMany({});
 	await Tag.deleteMany({});
 	await User.deleteMany({});
 	await Municipality.deleteMany({});
@@ -59,7 +57,7 @@ describe('Municipality Controller - getOneMunicipality', () => {
 	});
 	
 	test('should handle failed default municipality creation', async() => {
-		const createOneMock = jest.spyOn(Municipality, 'create').mockResolvedValueOnce(null);
+		const createMock = jest.spyOn(Municipality, 'create').mockResolvedValueOnce(null);
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'autre';
 
@@ -69,7 +67,7 @@ describe('Municipality Controller - getOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Failed to create default municipality'));
 
-		createOneMock.mockRestore();
+		createMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 
@@ -87,7 +85,7 @@ describe('Municipality Controller - getOneMunicipality', () => {
 	});
 	
 	test('should handle unexpected error', async() => {
-		const createOneMock = jest.spyOn(Municipality, 'findOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
+		const createMock = jest.spyOn(Municipality, 'findOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 
@@ -97,7 +95,7 @@ describe('Municipality Controller - getOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-		createOneMock.mockRestore();
+		createMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 });
@@ -126,7 +124,7 @@ describe('Municipality Controller - getAllMunicipalities', () => {
 	});
 	
 	test('should handle unexpected error', async() => {
-		const createOneMock = jest.spyOn(Municipality, 'find').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
+		const findMock = jest.spyOn(Municipality, 'find').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 		const result = await MunicipalityController.getAllMunicipalities();
@@ -135,7 +133,7 @@ describe('Municipality Controller - getAllMunicipalities', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-		createOneMock.mockRestore();
+		findMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 });
@@ -164,7 +162,7 @@ describe('Municipality Controller - createOneMunicipality', () => {
 	});
 
 	test('should handle failed municipality creation', async() => {
-		const createOneMock = jest.spyOn(Municipality, 'create').mockResolvedValueOnce(false);
+		const createMock = jest.spyOn(Municipality, 'create').mockResolvedValueOnce(false);
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 
@@ -174,12 +172,12 @@ describe('Municipality Controller - createOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Failed to create municipality'));
 
-		createOneMock.mockRestore();
+		createMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 	
 	test('should handle unexpected error', async() => {
-		const createOneMock = jest.spyOn(Municipality, 'findOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
+		const findOneMock = jest.spyOn(Municipality, 'findOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 
@@ -189,7 +187,7 @@ describe('Municipality Controller - createOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-		createOneMock.mockRestore();
+		findOneMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 });
@@ -236,7 +234,7 @@ describe('Municipality Controller - deleteOneMunicipality', () => {
 	});
 
 	test('should handle failed user update', async() => {
-		const createOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(false);
+		const findOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(false);
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 		const municipality = await Municipality.create({municipality: newMunicipality});
@@ -249,12 +247,12 @@ describe('Municipality Controller - deleteOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Failed to update the municipality of user'));
 
-		createOneMock.mockRestore();
+		findOneMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 	
 	test('should handle unexpected error', async() => {
-		const deleteOneMock = jest.spyOn(Municipality, 'findOneAndDelete').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
+		const findOneAndDeleteMock = jest.spyOn(Municipality, 'findOneAndDelete').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 
@@ -264,7 +262,7 @@ describe('Municipality Controller - deleteOneMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-		deleteOneMock.mockRestore();
+		findOneAndDeleteMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 });
@@ -295,7 +293,7 @@ describe('Municipality Controller - updateMunicipality', () => {
 	});
 	
 	test('should handle unexpected error', async() => {
-		const deleteOneMock = jest.spyOn(Municipality, 'updateOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
+		const updateOneMock = jest.spyOn(Municipality, 'updateOne').mockRejectedValueOnce(new Error('Mocked Error: unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newMunicipality = 'test';
 		const updatedMunicipality = 'chest';
@@ -306,7 +304,7 @@ describe('Municipality Controller - updateMunicipality', () => {
 		expect(result).toBe(false);
 		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-		deleteOneMock.mockRestore();
+		updateOneMock.mockRestore();
 		consoleErrorMock.mockRestore();
 	});
 });
