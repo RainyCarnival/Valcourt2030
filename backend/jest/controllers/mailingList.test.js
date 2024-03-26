@@ -1,4 +1,3 @@
-// Import necessary modules and setup files
 const { test, expect } = require('@jest/globals');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;

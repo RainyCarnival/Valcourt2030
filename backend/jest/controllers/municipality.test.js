@@ -1,7 +1,6 @@
 const { test, expect } = require('@jest/globals');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const Tag = require('../../database/models/tagsModel');
 const User = require('../../database/models/userModel');
 const Municipality = require('../../database/models/municipalityModel');
 const MunicipalityController = require('../../database/controllers/municipalityController');
@@ -33,7 +32,6 @@ afterAll(async() => {
 
 // Clean up the database
 afterEach(async() => {
-	await Tag.deleteMany({});
 	await User.deleteMany({});
 	await Municipality.deleteMany({});
 });
