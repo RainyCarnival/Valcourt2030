@@ -14,16 +14,22 @@ const { globalDefaultMunicipality } = require('../../globals');
 async function isEmailUnique(email) {
 	try {
 		if (!email){
-			console.log('Missing email');
+			console.error('Missing email');
 			return false;
 		}
 
-		const user = await User.findOne({ email });
-		return !user;
+		const user = await User.findOne({ email: email });
+
+		if(user){
+			console.error('Email already exists');
+			return false;
+		}
+
+		return true;
 
 	} catch (error) {
 		console.error('Unexpected error checking email uniqueness: ', error);
-		throw error;
+		return false;
 	}
 }
 
@@ -36,17 +42,17 @@ async function isEmailUnique(email) {
  */
 async function getOneUser(userEmail){
 	try {
-		const user = await User.findOne(userEmail).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
+		const user = await User.findOne({email: userEmail}).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
 
-		if(user){
-			return user;
-		} else {
+		if(!user){
 			console.error('User not found.');
 			return false;
 		}
+
+		return user;
 	} catch (error) {
-		console.error('Unexpected error getting the user: ', error);
-		throw error;
+		console.error(`Unexpected error getting the user: ${error}`);
+		return false;
 	}
 }
 
@@ -61,13 +67,16 @@ async function getAllUsers(){
 		const users = await User.find({}).populate([{path: 'interestedTags'}, {path: 'municipality', select: '_id municipality'}]);
 
 		if(users.length === 0){
-			console.warn('No users found.');
+			console.error('No users found.');
+			return false;
 		}
 
 		return users;
 
 	} catch (error) {
 		console.error(`Unexpected error retreiving the list of users: ${error}`);
+		
+		return false;
 	}
 }
 
@@ -80,29 +89,35 @@ async function getAllUsers(){
  * @returns {boolean} - Returns true if the registration is successful, false otherwise.
  */
 async function registerUser(userInfo, isAdmin = false, isValidated = false) {
-	const { getOneMunicipality } = require('./municipalityController');
+	const { getOneMunicipality, createOneMunicipality } = require('./municipalityController');
 	const session = await mongoose.startSession();
 	session.startTransaction();
 
 	try {
 		// Validate required fields
 		if(!userInfo.firstName || !userInfo.lastName || !userInfo.email || !userInfo.password){
-			console.error('Missing required fields: ', Object.keys(userInfo).filter(key => !userInfo[key]));
+			const missingFields = Object.keys({firstName: '', lastName: '', email: '', password: ''}).filter(key => !userInfo[key]);
+			
+			console.error(`Missing required fields: ${missingFields}`);
 			return false;
 		}
 
 		// Validate that interestedTags is an array if provided
 		if(userInfo.interestedTags && !Array.isArray(userInfo.interestedTags)){
-			console.error('interestedTags must be an array: ', userInfo.interestedTags);
+			console.error('Invalid type error: interested tags must be an Array.');
 			return false;
 		}
 		
 		// Set a default municipality if not provided
 		if(!userInfo.municipality){
-			const municipality = await getOneMunicipality(globalDefaultMunicipality);
+			let municipality = await getOneMunicipality(globalDefaultMunicipality);
 			
 			if(!municipality){
-				throw new Error('Creation Error: Failed to get default municipality');
+				municipality = await createOneMunicipality(globalDefaultMunicipality);
+
+				if (!municipality){
+					throw new Error('Creation Error: Failed to create default municipality');
+				}
 			}
 			
 			userInfo.municipality = municipality._id;
@@ -170,10 +185,10 @@ async function loginUser(email, password) {
 			throw new Error('Login Error: loginUser method requires a password.');
 		}
 
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email: email });
 
 		if (!user){
-			throw new Error('Login Error: Email not found in database.');
+			throw new Error('Login Error: User not found in database.');
 		}
 
 		const verify = await bcrypt.compare(password, user.password);
@@ -188,7 +203,7 @@ async function loginUser(email, password) {
 		if(error.message.startsWith('Login Error')){
 			console.error(error);
 		} else {
-			console.error('Unexpected error logging in: ', error);
+			console.error(`Unexpected error logging in: ${error}`);
 		}
 		
 		return false;
@@ -282,11 +297,10 @@ async function deleteOneUser(userEmail) {
 	session.startTransaction();
 
 	try{
-
 		const user = await User.findOne({email: userEmail});
 
 		if(!user){
-			throw new Error('Deletion Error: No matching user to delete');
+			throw new Error('Deletion Error: User not found.');
 		}
 
 		// Remove the user from associated mailing lists
@@ -295,13 +309,13 @@ async function deleteOneUser(userEmail) {
 				const removedTagResult = await updateOneMailingList(tag, 'remove', user._id);
 				
 				if (!removedTagResult){
-					throw new Error('Update Error: Failed to remove user to the mailing list.');
+					throw new Error('Deletion Error: Failed to remove user from the mailing list.');
 				}				
 			}
 		}
 
 		const result = await User.deleteOne({ email: userEmail });
-
+		
 		if (result.deletedCount === 0){
 			throw new Error('Deletion Error: Failed to delete user.');
 		}

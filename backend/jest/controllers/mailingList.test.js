@@ -14,7 +14,7 @@ const testUser = {
 	lastName: 'testington',
 	email: 'test@test.com',
 	password: 'testing1',
-	interestedTags: '',
+	interestedTags: [],
 	isAdmin: false,
 	isValidated: false
 };
@@ -65,7 +65,7 @@ describe('MailingListController - createOneMailingList', () => {
 	});
 
 	test('should handle unexpected errors', async() => {
-		const mailingListCreateMock = jest.spyOn(MailingList, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));
+		const mailingListCreateMock = jest.spyOn(MailingList, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 		const tag = await Tag.create({tag: newTag});
@@ -108,7 +108,7 @@ describe('MailingListController - getOneMailingList', () => {
 	});
 
 	test('should handle unexpected errors', async() => {
-		const mailingListFindOneMock = jest.spyOn(MailingList, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));
+		const mailingListFindOneMock = jest.spyOn(MailingList, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 		const tag = await Tag.create({tag: newTag});
@@ -239,7 +239,7 @@ describe('MailingListController - updateOneMailingList', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const mailingListFindOneMock = jest.spyOn(MailingList, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));
+		const mailingListFindOneMock = jest.spyOn(MailingList, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 		const tag = await Tag.create({tag: newTag});
@@ -287,7 +287,7 @@ describe('MailingListController - deleteOneMailingList', () => {
 	});
 
 	test('should handle unexpected error', async() => {
-		const mailingListDeleteOneMock = jest.spyOn(MailingList, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));
+		const mailingListDeleteOneMock = jest.spyOn(MailingList, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 		const tag = await Tag.create({tag: newTag});

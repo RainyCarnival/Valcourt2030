@@ -1,5 +1,6 @@
 const { test, expect } = require('@jest/globals');
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const Tag = require('../../database/models/tagsModel');
 const MailingList = require('../../database/models/mailingListModel');
@@ -14,7 +15,7 @@ const testUser = {
 	lastName: 'testington',
 	email: 'test@test.com',
 	password: 'testing1',
-	interestedTags: '',
+	interestedTags: [],
 	isAdmin: false,
 	isValidated: false
 };
@@ -23,7 +24,7 @@ const testEvent = {
 	eventId: '1234',
 	title: 'testing event',
 	description: 'this is a test event',
-	tags: '',
+	tags: [],
 	venue: 'this venue',
 	address: '123 test avenue',
 	date: 'tomorrow',
@@ -31,7 +32,7 @@ const testEvent = {
 };
 
 const testMailingList = {
-	tag: '',
+	tag: new ObjectId(),
 	users: [],
 };
 
@@ -131,7 +132,7 @@ describe('Tag Controller - createOneTag', () => {
 	});
 
 	test('should handle unexpected errors', async() => {
-		const tagFindOneMock = jest.spyOn(Tag, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in create.'));
+		const tagFindOneMock = jest.spyOn(Tag, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 
@@ -170,7 +171,7 @@ describe('Tag Controller - getOneTag', () => {
 	});
 
 	test('should handle unexpected error', async() => {
-		const tagFindOneMock = jest.spyOn(Tag, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in findOne.'));
+		const tagFindOneMock = jest.spyOn(Tag, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const tag = 'test';
 
@@ -206,7 +207,7 @@ describe('Tag Controller - getAllTags', () => {
 	});
 
 	test('should handle unexpected error', async() => {
-		const tagFindOneMock = jest.spyOn(Tag, 'find').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const tagFindOneMock = jest.spyOn(Tag, 'find').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 		const result = await TagsController.getAllTags();
@@ -264,7 +265,7 @@ describe('Tag Controller - updateTag', () => {
 	});
 
 	test('should handle unexpected error', async() => {
-		const tagFindOneMock = jest.spyOn(Tag, 'updateOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in updateOne.'));
+		const tagFindOneMock = jest.spyOn(Tag, 'updateOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const newTag = 'test';
 		const updatedTag = 'chest';
@@ -378,7 +379,7 @@ describe('Tag Controller - deleteOneTag', () => {
 
 	test('should handle unexpected errors', async() => {
 		const tag = await deleteTagSetup();
-		const tagDeleteOneMock = jest.spyOn(Tag, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in updateOne.'));
+		const tagDeleteOneMock = jest.spyOn(Tag, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 		const result = await TagsController.deleteOneTag(tag._id);

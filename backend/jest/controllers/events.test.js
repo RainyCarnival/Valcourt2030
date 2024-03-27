@@ -62,7 +62,7 @@ describe('Events Controller - getAllEvents', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const findMock = jest.spyOn(Events, 'find').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const findMock = jest.spyOn(Events, 'find').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		await Events.create(testEvent);
 		
@@ -101,7 +101,7 @@ describe('Events Controller - getOneEvent', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const findOneMock = jest.spyOn(Events, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const findOneMock = jest.spyOn(Events, 'findOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		await Events.create(testEvent);
 		
@@ -138,7 +138,7 @@ describe('Events Controller - createOneEvent', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const createMock = jest.spyOn(Events, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const createMock = jest.spyOn(Events, 'create').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		
 		const result = await EventsController.createOneEvent(testEvent);
@@ -234,7 +234,7 @@ describe('Events Controller - updateOneEvent', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const updateOneMock = jest.spyOn(Events, 'updateOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const updateOneMock = jest.spyOn(Events, 'updateOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		await Events.create(testEvent);
 		testEvent.date = 'yesterday';
@@ -287,7 +287,7 @@ describe('Events Controller - deleteOneEvent', () => {
 	});
 
 	test('should handle an unexpected error', async() => {
-		const deleteOneMock = jest.spyOn(Events, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error in find.'));
+		const deleteOneMock = jest.spyOn(Events, 'deleteOne').mockRejectedValueOnce(new Error('Mocked error: Unexpected error.'));
 		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
 		await Events.create(testEvent);
 		
