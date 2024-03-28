@@ -21,17 +21,6 @@ const testUser = {
 	interestedTags: []
 };
 
-const testEvent = {
-	eventId: '1234',
-	title: 'testing event',
-	description: 'this is a test event',
-	tags: [],
-	venue: 'this venue',
-	address: '123 test avenue',
-	date: 'tomorrow',
-	url: 'test.com'
-};
-
 const testMailingList = {
 	tag: new ObjectId(),
 	users: [],
