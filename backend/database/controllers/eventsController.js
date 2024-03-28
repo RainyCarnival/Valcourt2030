@@ -10,15 +10,16 @@ async function getAllEvents(){
 		const events = await Event.find({});
 
 		if(events.length === 0){
-			console.warn('No Events found.');
+			console.error('No Events found.');
 			return false;
 		}
 
 		return events;
 
 	} catch (error) {
-		console.error('An unexpected error occured retreiving the list of events: ', error);
-		throw error;
+		console.error(`An unexpected error occured retreiving the list of events: ${error}`);
+
+		return false;
 	}
 }
 
@@ -41,7 +42,7 @@ async function getOneEvent(eventId){
 
 	} catch (error) {
 		console.error('An unexpected error occured retreiving the event: ', error);
-		throw error;
+		return false;
 	}
 }
 
@@ -61,7 +62,7 @@ async function createOneEvent(eventData){
 
 		return result;
 	} catch (error) {
-		if (error.message.startsWith('Creation Fail')) {
+		if (error.message.startsWith('Creation Error')) {
 			console.error(error);
 		} else {
 			console.error('An unexpected error occured creating the event: ', error);
@@ -80,31 +81,36 @@ async function createOneEvent(eventData){
  */
 async function updateOneEvent(eventId, eventUpdateData) {
 	try{
-		let allTags;
-
 		const originalEvent = await Event.findOne({eventId: eventId});
 
 		if(!originalEvent){
 			throw new Error(`Document Not Found: No document found for event id ${eventId} to update.`);
 		}
-
-		// Update the event document and retrieve the updated version.
-		const updatedEvent = await Event.findOneAndUpdate({eventId: eventId}, {$set: eventUpdateData}, {new: true});
-
+		
 		// Check if any modifications were made by comparing keys in eventUpdateData
 		const isModified = !Object.keys(eventUpdateData).every(key => {
-			return JSON.stringify(updatedEvent[key]) === JSON.stringify(originalEvent[key]);
+			return JSON.stringify(eventUpdateData[key]) === JSON.stringify(originalEvent[key]);
 		});
 
 		if(!isModified){
 			throw new Error('Update Error: No modifications to be made, the data is the same.');
 		}
-		
-		// Handle added tags.
-		const addedTags = updatedEvent.tags.filter(tag => !originalEvent.tags.includes(tag));
 
-		if (addedTags.length > 0){
-			allTags = [...originalEvent.tags, ...addedTags];
+		
+		// Update the event document and retrieve the updated version.
+		const updatedEvent = await Event.updateOne({eventId: eventId}, {$set: eventUpdateData}, {new: true});
+		
+		if (updatedEvent.modifiedCount <= 0){
+			throw new Error('Update Error: Failed to update the event.');
+		}
+		
+		// Handle added tags. Return tag list for email notifications
+		let allTags;
+
+		const changedTags = eventUpdateData.tags.filter(tag => !originalEvent.tags.includes(tag));
+
+		if (changedTags.length > 0){
+			allTags = [...originalEvent.tags, ...changedTags];
 		} else {
 			allTags = originalEvent.tags;
 		}
@@ -144,11 +150,11 @@ async function deleteOneEvent(eventId){
 		if (result.deletedCount <= 0){
 			throw new Error('Deletion Error: Failed to delete event.');
 		}
-
+		// Return tags for email notifications
 		return event.tags;
 	} catch (error) {
 		if(error.message.startsWith('Deletion Error')){
-			console.log(error);
+			console.error(error);
 		} else {
 			console.error('An unexpected error occured deleting the event: ', error);
 		}

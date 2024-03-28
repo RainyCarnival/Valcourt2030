@@ -14,16 +14,69 @@ const { globalDefaultMunicipality } = require('../../globals');
 async function isEmailUnique(email) {
 	try {
 		if (!email){
-			console.log('Missing email');
+			console.error('Missing email');
 			return false;
 		}
 
-		const user = await User.findOne({ email });
-		return !user;
+		const user = await User.findOne({ email: email });
+
+		if(user){
+			console.error('Email already exists');
+			return false;
+		}
+
+		return true;
 
 	} catch (error) {
 		console.error('Unexpected error checking email uniqueness: ', error);
-		throw error;
+		return false;
+	}
+}
+
+/**
+ * Retrieves a user based on the specified criteria and populates associated fields.
+ *
+ * @param {object} userEmail - Criteria to find the user in the User collection.
+ * @returns {object|boolean} - Returns the found user object if successful, false if not found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
+async function getOneUser(userEmail){
+	try {
+		const user = await User.findOne({email: userEmail}).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
+
+		if(!user){
+			console.error('User not found.');
+			return false;
+		}
+
+		return user;
+	} catch (error) {
+		console.error(`Unexpected error getting the user: ${error}`);
+		return false;
+	}
+}
+
+/**
+ * Retrieves all users from the User collection and populates associated fields.
+ *
+ * @returns {Array} - Returns an array of user objects if successful, an empty array if no users found.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the process.
+ */
+async function getAllUsers(){
+	try{
+		const users = await User.find({}).populate([{path: 'interestedTags'}, {path: 'municipality', select: '_id municipality'}]);
+
+		if(users.length === 0){
+			console.error('No users found.');
+			return false;
+		}
+
+		return users;
+
+	} catch (error) {
+		console.error(`Unexpected error retreiving the list of users: ${error}`);
+		
+		return false;
 	}
 }
 
@@ -43,13 +96,15 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 	try {
 		// Validate required fields
 		if(!userInfo.firstName || !userInfo.lastName || !userInfo.email || !userInfo.password){
-			console.log('Missing required fields: ', Object.keys(userInfo).filter(key => !userInfo[key]));
+			const missingFields = Object.keys({firstName: '', lastName: '', email: '', password: ''}).filter(key => !userInfo[key]);
+			
+			console.error(`Missing required fields: ${missingFields}`);
 			return false;
 		}
 
 		// Validate that interestedTags is an array if provided
 		if(userInfo.interestedTags && !Array.isArray(userInfo.interestedTags)){
-			console.log('interestedTags must be an array: ', userInfo.interestedTags);
+			console.error('Invalid type error: interested tags must be an Array.');
 			return false;
 		}
 		
@@ -57,9 +112,11 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		if(!userInfo.municipality){
 			const municipality = await getOneMunicipality(globalDefaultMunicipality);
 			
-			if(municipality){
-				userInfo.municipality = municipality._id;
+			if(!municipality){
+				throw new Error('Creation Error: Failed to create default municipality');
 			}
+			
+			userInfo.municipality = municipality._id;
 		}
 
 		const newUser = await User.create({
@@ -98,7 +155,7 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		} else if (error.message.startsWith('Update Error')){
 			console.error(error);
 		} else {
-			console.error('Unexpected error creating user: ', error);
+			console.error(`Unexpected error creating user: ${error}`);
 		}
 
 		return false;
@@ -117,33 +174,34 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 async function loginUser(email, password) {
 	try {
 		if (!email){
-			console.log('loginUser method requires an email.');
-			return false;
+			throw new Error('Login Error: loginUser method requires an email.');
 		}
 
 		if(!password){
-			console.log('loginUser method requires a password.');
+			throw new Error('Login Error: loginUser method requires a password.');
 		}
 
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email: email });
 
 		if (!user){
-			console.log('Email not found in database.');
-			return false;
+			throw new Error('Login Error: User not found in database.');
 		}
 
 		const verify = await bcrypt.compare(password, user.password);
 
-		if(verify){
-			return true;
+		if(!verify){
+			throw new Error('Login Error: Password validation failure.');
 		}
-		else{
-			console.log('Password validation failure.');
-			return false;
-		}
+
+		return true;
 	}
 	catch(error) {
-		console.error('Unexpected error logging in: ', error);
+		if(error.message.startsWith('Login Error')){
+			console.error(error);
+		} else {
+			console.error(`Unexpected error logging in: ${error}`);
+		}
+		
 		return false;
 	}
 }
@@ -160,10 +218,10 @@ async function updateOneUser(email, userUpdateData) {
 	session.startTransaction();
 
 	try{
-		const originalUser = await User.findOne({email});
+		const originalUser = await User.findOne({email: email});
 
 		if(!originalUser){
-			throw new Error(`Document Not Found: No document found for ${email} to update.`);
+			throw new Error(`Document Not Found: User not found ${email}.`);
 		}
 
 		// Update the user document and retrieve the updated version.
@@ -175,7 +233,7 @@ async function updateOneUser(email, userUpdateData) {
 		});
 
 		if(!isModified){
-			throw new Error('Update Error: No modifications made the data is the same.');
+			throw new Error('Update Error: No modifications made. The data is the same.');
 		}
 
 		// Handle added tags.
@@ -199,7 +257,7 @@ async function updateOneUser(email, userUpdateData) {
 				const removedTagResult = await updateOneMailingList(tag, 'remove', updatedUser._id);
 				
 				if (!removedTagResult){
-					throw new Error('Update Error: Failed to remove user to the mailing list.');
+					throw new Error('Update Error: Failed to remove user from the mailing list.');
 				}				
 			}
 		}
@@ -215,7 +273,7 @@ async function updateOneUser(email, userUpdateData) {
 		} else if (error.message.startsWith('Update Error')) {
 			console.error(error);
 		} else {
-			console.error('An unexpected error occured when updated user data: ', error);
+			console.error(`An unexpected error occured when updated user data: ${error}`);
 		}
 		
 		return false;
@@ -235,11 +293,10 @@ async function deleteOneUser(userEmail) {
 	session.startTransaction();
 
 	try{
-
 		const user = await User.findOne({email: userEmail});
 
 		if(!user){
-			throw new Error('Deletion Error: No matching user to delete');
+			throw new Error('Deletion Error: User not found.');
 		}
 
 		// Remove the user from associated mailing lists
@@ -248,13 +305,13 @@ async function deleteOneUser(userEmail) {
 				const removedTagResult = await updateOneMailingList(tag, 'remove', user._id);
 				
 				if (!removedTagResult){
-					throw new Error('Update Error: Failed to remove user to the mailing list.');
+					throw new Error('Deletion Error: Failed to remove user from the mailing list.');
 				}				
 			}
 		}
 
 		const result = await User.deleteOne({ email: userEmail });
-
+		
 		if (result.deletedCount === 0){
 			throw new Error('Deletion Error: Failed to delete user.');
 		}
@@ -273,51 +330,6 @@ async function deleteOneUser(userEmail) {
 
 	} finally {
 		session.endSession();
-	}
-}
-
-/**
- * Retrieves a user based on the specified criteria and populates associated fields.
- *
- * @param {object} userEmail - Criteria to find the user in the User collection.
- * @returns {object|boolean} - Returns the found user object if successful, false if not found.
- * @throws {Error} - Throws an error if an unexpected error occurs during the process.
- */
-async function getOneUser(userEmail){
-	try {
-		const user = await User.findOne(userEmail).populate([{path: 'interestedTags', select: '_id tag'}, {path: 'municipality', select: '_id municipality'}]);
-
-		if(user){
-			return user;
-		} else {
-			console.error('User not found.');
-			return false;
-		}
-	} catch (error) {
-		console.error('Unexpected error getting the user: ', error);
-		throw error;
-	}
-}
-
-/**
- * Retrieves all users from the User collection and populates associated fields.
- *
- * @returns {Array} - Returns an array of user objects if successful, an empty array if no users found.
- * @throws {Error} - Throws an error if an unexpected error occurs during the process.
- */
-async function getAllUsers(){
-	try{
-		const users = await User.find({}).populate([{path: 'interestedTags'}, {path: 'municipality', select: '_id municipality'}]);
-
-		if(users.length === 0){
-			console.warn('No users found.');
-		}
-
-		return users;
-
-	} catch (error) {
-		console.error('Unexpected error retreiving the list of users: ', error);
-		throw error;
 	}
 }
 

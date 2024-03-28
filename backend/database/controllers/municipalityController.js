@@ -13,24 +13,30 @@ async function getOneMunicipality(municipalityToFind){
 	try {
 		// Find a municipality based on the specified criteria (case-insensitive)
 		const municipality = await Municipality.findOne({municipality: {$regex: municipalityToFind, $options: 'i'}});
-
-		if(municipality){
-			return municipality;
-		} else if (municipalityToFind.toLowerCase() === globalDefaultMunicipality) {
+		
+		if(!municipality && municipalityToFind.toLowerCase() === globalDefaultMunicipality.toLowerCase()){
 			// Create default Municipality if it does not exist.
-			const result = await Municipality.create({municipality: globalDefaultMunicipality});
-
-			if (result){
-				return result;
+			const defaultMunitcipality = await Municipality.create({municipality: globalDefaultMunicipality});
+			
+			if (!defaultMunitcipality){
+				throw new Error('Create Error: Failed to create default municipality.');
 			}
-		} else {
-			console.error('Municipality not found.');
-			return false;
+			
+			return defaultMunitcipality;
+
+		} else if (!municipality) {
+			throw new Error('Get Error: Municipality not found.');
 		}
 
+		return municipality;
+
 	} catch (error) {
-		console.error('Unexpected error retreiving the municipality: ', error);
-		throw error;
+		if(error.message.startsWith('Get Error') || error.message.startsWith('Create Error')){
+			console.error(error);
+		} else {
+			console.error(`Unexpected error retreiving the municipality: ${error}`);
+		}
+		return false;
 	}
 }
 
@@ -45,14 +51,14 @@ async function getAllMunicipalities(){
 		const municipalities = await Municipality.find({});
 
 		if(municipalities.length === 0){
-			console.warn('No municipalities found.');
+			console.error('No municipalities found.');
 		}
 
 		return municipalities;
 
 	} catch (error) {
 		console.error('Unexpected error retreiving the list of municipalities: ', error);
-		throw error;
+		return false;
 	}
 }
 
@@ -67,21 +73,25 @@ async function createOneMunicipality(newMunicipality){
 	try{        
 		const isExisting = await Municipality.findOne({ municipality: {$regex: newMunicipality, $options: 'i'} });
 
-		if (!isExisting){
-			await Municipality.create({ municipality: newMunicipality });
-			return true;
-		} else {
-			console.log('Municipality already exists.');
-			return false;
+		if (isExisting){
+			throw new Error('Create Error: Municipality already exists.');
 		}
+
+		const result = await Municipality.create({ municipality: newMunicipality });
+
+		if (!result) {
+			throw new Error('Create Error: Failed to create municipality');
+		}
+
+		return true;
+
 	} catch (error) {
-		if (error.name === 'MongoError' && error.code === 11000) {
-			console.error('Municipality already exists. Duplicate key violation.');
-			return false;
+		if (error.message.startsWith('Create Error')) {
+			console.error(error);
 		} else {
-			console.error('Unexpected error updating the municipality: ', error);
-			throw error;
+			console.error(`Unexpected error updating the municipality: ${error}`);
 		}
+		return false;
 	}
 }
 
@@ -103,21 +113,21 @@ async function deleteOneMunicipality(municipalityToDelete){
 		const deletedMunicipality = await Municipality.findOneAndDelete({ municipality: municipalityToDelete });
     
 		if (!deletedMunicipality){
-			throw new Error(`Deletion Error: Could not find ${municipalityToDelete} to delete.`);
+			throw new Error('Deletion Error: Could not find municipality to delete.');
 		}
 
 		const users = await getAllUsers();
-		
-		if (!users){
-			throw new Error('Deletion Error: Failed to retrieve all users');
-		}
 
 		// Filter users associated with the deleted municipality
 		const usersToUpdate = users.filter(user => user.municipality === null);
 
 		// Update users with the default municipality
 		if (usersToUpdate.length > 0){
-			const newMunicipality = await Municipality.findOne({municipality: globalDefaultMunicipality});
+			let newMunicipality = await Municipality.findOne({municipality: globalDefaultMunicipality});
+
+			if (!newMunicipality){
+				newMunicipality = await Municipality.create({municipality: globalDefaultMunicipality});
+			}
 
 			for (const user of usersToUpdate){
 				const updatedUserResult = await updateOneUser(user.email, {municipality: newMunicipality});
@@ -157,21 +167,20 @@ async function updateMunicipality(currentMunicipality, municipalityUpdateData) {
 	try{
 		// Update the municipality based on the current municipality value
 		const result = await Municipality.updateOne({ municipality: currentMunicipality }, { $set: { municipality: municipalityUpdateData }});
+		
+		if(result.modifiedCount <= 0){
+			throw new Error('Update Error: No matching municipality to update.');
+		} 
 
-		if(result.n > 0){
-			return true;
-		} else {
-			console.error('No matching municipalities to update.');
-			return false;
-		}
+		return true;
 	} catch (error) {
-		if (error.name === 'MongoError' && error.code === 11000) {
-			console.error('Update failed due to duplicate municipality value.');
-			return false;
+		if (error.message.startsWith('Update Error')) {
+			console.error(error);
 		} else {
-			console.error('Unexpected error updating the municipality: ', error);
-			throw error;
+			console.error(`Unexpected error updating the municipality: ${error}`);
 		}
+		
+		return false;
 	}
 }
 
