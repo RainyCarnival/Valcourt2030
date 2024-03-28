@@ -36,7 +36,6 @@ async function getOneMunicipality(municipalityToFind){
 		} else {
 			console.error(`Unexpected error retreiving the municipality: ${error}`);
 		}
-
 		return false;
 	}
 }

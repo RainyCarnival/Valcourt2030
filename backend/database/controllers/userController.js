@@ -89,7 +89,7 @@ async function getAllUsers(){
  * @returns {boolean} - Returns true if the registration is successful, false otherwise.
  */
 async function registerUser(userInfo, isAdmin = false, isValidated = false) {
-	const { getOneMunicipality, createOneMunicipality } = require('./municipalityController');
+	const { getOneMunicipality } = require('./municipalityController');
 	const session = await mongoose.startSession();
 	session.startTransaction();
 
@@ -110,14 +110,10 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		
 		// Set a default municipality if not provided
 		if(!userInfo.municipality){
-			let municipality = await getOneMunicipality(globalDefaultMunicipality);
+			const municipality = await getOneMunicipality(globalDefaultMunicipality);
 			
 			if(!municipality){
-				municipality = await createOneMunicipality(globalDefaultMunicipality);
-
-				if (!municipality){
-					throw new Error('Creation Error: Failed to create default municipality');
-				}
+				throw new Error('Creation Error: Failed to create default municipality');
 			}
 			
 			userInfo.municipality = municipality._id;
@@ -159,7 +155,7 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 		} else if (error.message.startsWith('Update Error')){
 			console.error(error);
 		} else {
-			console.error('Unexpected error creating user: ', error);
+			console.error(`Unexpected error creating user: ${error}`);
 		}
 
 		return false;
@@ -225,7 +221,7 @@ async function updateOneUser(email, userUpdateData) {
 		const originalUser = await User.findOne({email: email});
 
 		if(!originalUser){
-			throw new Error(`Document Not Found: No document found for ${email} to update.`);
+			throw new Error(`Document Not Found: User not found ${email}.`);
 		}
 
 		// Update the user document and retrieve the updated version.
@@ -237,7 +233,7 @@ async function updateOneUser(email, userUpdateData) {
 		});
 
 		if(!isModified){
-			throw new Error('Update Error: No modifications made the data is the same.');
+			throw new Error('Update Error: No modifications made. The data is the same.');
 		}
 
 		// Handle added tags.

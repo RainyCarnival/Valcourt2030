@@ -7,7 +7,9 @@ const Tag = require('../../database/models/tagsModel');
 const MailingList = require('../../database/models/mailingListModel');
 const User = require('../../database/models/userModel');
 const Event = require('../../database/models/eventsModel');
+const Municipality = require('../../database/models/municipalityModel');
 const UserController = require('../../database/controllers/userController');
+const { globalDefaultMunicipality } = require('../../globals');
 
 let mongoServer;
 
@@ -61,6 +63,7 @@ afterEach(async() => {
 	await MailingList.deleteMany({});
 	await User.deleteMany({});
 	await Event.deleteMany({});
+	await Municipality.deleteMany({});
 });
 
 describe('User Controller - getAllUsers', () => {
@@ -192,9 +195,16 @@ describe('User Controller - registerUser', () => {
 
 		const userResult = await UserController.registerUser(testUser, false, false);
 		const mailingListResult = await MailingList.findOne({_id: mailingList._id});
-
+		const user = await User.findOne({email: testUser.email});
+		const municipality = await Municipality.findOne({municipality: globalDefaultMunicipality});
+		
 		expect(userResult).toBe(true);
-		expect(mailingListResult.users).toHaveLength(1);
+
+		// Ensure the user is added to the mailing list
+		expect(mailingListResult.users[0]._id).toEqual(user._id);
+
+		// Ensure the default municipality is created
+		expect(user.municipality).toEqual(municipality._id);
 	});
 
 	test('should register a users as an admin and update mailing lists', async() => {
@@ -270,37 +280,71 @@ describe('User Controller - registerUser', () => {
 		consoleErrorMock.mockRestore();
 	});
 
-	// TODO
-	// test('should handle setting default municipality', async() => {
+	test('should handle failure to get default municipality', async() => {
+		const createMock = jest.spyOn(Municipality, 'create').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await MailingList.create(testMailingList);
 
-	// });
+		const test = {
+			firstName: testUser.firstName,
+			lastName: testUser.lastName,
+			email: testUser.email,
+			password: testUser.password
+		};
+		const result = await UserController.registerUser(test);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to create default municipality'));
+
+		createMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 	
-	// test('should handle failure to get default municipality', async() => {
+	test('should handle failure to create user', async() => {
+		const createMock = jest.spyOn(User, 'create').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await MailingList.create(testMailingList);
 
-	// });
-	
-	// test('should handle failure to create user', async() => {
+		const result = await UserController.registerUser(testUser);
+		const errorMessage = console.error.mock.calls.toString();
 
-	// });
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to create user'));
 
-	// test('should handle failure updating mailing list', async() => {
+		createMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 
-	// });
+	test('should handle failure updating mailing list', async() => {
+		const findOneMock = jest.spyOn(MailingList, 'findOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await MailingList.create(testMailingList);
 
-	// test('should handle unexpected errors', async() => {
-	// 	const findOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(new Error('Mocked error: Unexpected error.'));
-	// 	const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
-	// 	await User.create(testUser);
+		const result = await UserController.registerUser(testUser);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to add user to the mailing list'));
+
+		findOneMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
+
+	test('should handle unexpected errors', async() => {
+		const createMock = jest.spyOn(User, 'create').mockResolvedValueOnce(new Error('Mocked error: Unexpected error.'));
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await MailingList.create(testMailingList);
 		
-	// 	const result = await UserController.deleteOneUser(testUser.email);
-	// 	const errorMessage = console.error.mock.calls.toString();
+		const result = await UserController.registerUser(testUser);
+		const errorMessage = console.error.mock.calls.toString();
 
-	// 	expect(result).toBe(false);
-	// 	expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
 
-	// 	findOneMock.mockRestore();
-	// 	consoleErrorMock.mockRestore();
-	// });
+		createMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 });
 
 describe('User Controller - loginUser', () => {
@@ -386,30 +430,111 @@ describe('User Controller - loginUser', () => {
 });
 
 // TODO
-// describe('User Controller - updateOneUser', () => {
-// 	test('should get all users', async() => {
+describe('User Controller - updateOneUser', () => {
+	test('should update the user adding and removing tags', async() => {
+		await MailingList.create(testMailingList);
+		await User.create(testUser);
+		const updatedUser = testUser;
+		updatedUser.interestedTags = [];
 
-// 	});
+		// Test updating user tags and removing them from the mailing list.
+		let userResult = await UserController.updateOneUser(testUser.email, updatedUser);
+		let mailingListResult = await MailingList.findOne({tag: testMailingList.tag});
 
-// 	test('should handle no users found', async() => {
+		expect(userResult).toBe(true);
+		expect(mailingListResult.users).toHaveLength(0);
 
-// 	});
+		// Test updating user tags and adding them back to the mailing list.
+		updatedUser.interestedTags = [testMailingList.tag];
 
-// 	test('should handle unexpected errors', async() => {
-		// const findOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(new Error('Mocked error: Unexpected error.'));
-		// const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
-		// await User.create(testUser);
+		userResult = await UserController.updateOneUser(testUser.email, updatedUser);
+		mailingListResult = await MailingList.findOne({tag: testMailingList.tag});
+
+		expect(userResult).toBe(true);
+		expect(mailingListResult.users).toHaveLength(1);
+	});
+
+	test('should handle no users found', async() => {
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+		const result = await UserController.updateOneUser(testUser.email, testUser);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('User not found'));
+
+		consoleErrorMock.mockRestore();
+	});
+
+	test('should handle no modifications made', async() => {
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await MailingList.create(testMailingList);
+		await User.create(testUser);
+
+		const result = await UserController.updateOneUser(testUser.email, testUser);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('No modifications made'));
+
+		consoleErrorMock.mockRestore();
+	});
+
+	
+	test('should handle failure to add user to mailing list', async() => {
+		const findOneMock = jest.spyOn(MailingList, 'findOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		testUser.interestedTags = [];
+		await User.create(testUser);
+		await MailingList.create(testMailingList);
+		const updatedUser = testUser;
+		updatedUser.interestedTags = [testMailingList.tag];
+
+
+		const result = await UserController.updateOneUser(testUser.email, testUser);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to add user to the mailing list'));
+
+		findOneMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
+
+	test('should handle failure to remove user from mailing list', async() => {
+		const findOneMock = jest.spyOn(MailingList, 'findOne').mockResolvedValueOnce(false);
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await User.create(testUser);
+		await MailingList.create(testMailingList);
+		const updatedUser = testUser;
+		updatedUser.interestedTags = [];
+
+		const result = await UserController.updateOneUser(testUser.email, testUser);
+		const errorMessage = console.error.mock.calls.toString();
+
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('Failed to remove user from the mailing list'));
 		
-		// const result = await UserController.deleteOneUser(testUser.email);
-		// const errorMessage = console.error.mock.calls.toString();
+		findOneMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
 
-		// expect(result).toBe(false);
-		// expect(errorMessage).toEqual(expect.stringContaining('Unexpected error'));
+	test('should handle unexpected errors', async() => {
+		const findOneMock = jest.spyOn(User, 'findOne').mockResolvedValueOnce(new Error('Mocked error: Unexpected error.'));
+		const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
+		await User.create(testUser);
+		await MailingList.create(testMailingList);
+		
+		const result = await UserController.updateOneUser(testUser.email, testUser);
+		const errorMessage = console.error.mock.calls.toString();
 
-		// findOneMock.mockRestore();
-		// consoleErrorMock.mockRestore();
-// 	});
-// });
+		expect(result).toBe(false);
+		expect(errorMessage).toEqual(expect.stringContaining('unexpected error'));
+
+		findOneMock.mockRestore();
+		consoleErrorMock.mockRestore();
+	});
+});
 
 describe('User Controller - deleteOneUser', () => {
 	test('should delete one users', async() => {
