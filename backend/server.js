@@ -9,6 +9,7 @@ const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
 const { getAllMunicipalities } = require('./database/controllers/municipalityController');
 require('dotenv').config();
+const EventController = require('./database/controllers/eventsController.js');
 
 const app = express();
 
@@ -22,6 +23,16 @@ app.use((err, req, res, next) => {
 });
 
 connectToDatabase().then(() => {
+
+	app.post('/api-events-hook', async(req, res) => {
+		const eventInfo = req.body;
+
+		console.log('eventInfo: ', eventInfo);
+
+		// const event = await EventController.getOneEvent(eventInfo.id);
+
+	});
+
 	// FIXME Temp placement for frontend testing
 	app.get('/getAllTags', async(req, res) => {
 		const tags = await getAllTags();
