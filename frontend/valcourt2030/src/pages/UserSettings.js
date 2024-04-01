@@ -85,10 +85,10 @@ const UserSettingsPage = () => {
                   <Card.Title>Changer le mot de passe</Card.Title>
                   <Form onSubmit={handlePasswordChange}>
                     <Form.Group className="mb-3" controlId="formNewPassword">
-                      <Form.Control type="password" placeholder="New Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <Form.Control type="password" placeholder="Nouveau mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </Form.Group>
                     <Form.Group className="mb-3" controlId="formConfirmPassword">
-                      <Form.Control type="password" placeholder="Re-Enter Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                      <Form.Control type="password" placeholder="Entrez à nouveau le mot de passe" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                     </Form.Group>
                     <Button variant="primary" type="submit"  style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }}>Sauvegarder</Button>
                   </Form>
