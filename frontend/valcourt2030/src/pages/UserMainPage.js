@@ -2,6 +2,7 @@ import React from 'react';
 import { Navbar, Nav, Container, Row, Col, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png'; // Make sure this path is correct
 import Background from '../components/Background';
+import { useNavigate } from 'react-router-dom';
 
 const UserMainPage = () => {
   // Dummy data for tags, can be fetched from an API or state
@@ -15,30 +16,36 @@ const UserMainPage = () => {
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.'
   };
 
-  const handleEvents = () => {} // Add logic to navigate to events page
+  const navigate = useNavigate();
 
-  const handleSettings = () => {} // Add logic to navigate to settings page
+  const handleHome = () => {navigate('/usermain')}
 
-  const handleLogout = () => {} // Add logic to logout user
+  const handleEvents = () => {navigate('/userevent')} // Add logic to navigate to events page
+
+  const handleAbout = () => {navigate('/userAbout')} // Add logic to navigate to about page
+
+  const handleSettings = () => {navigate('/usersetting')} // Add logic to navigate to settings page
+
+  const handleLogout = () => {navigate('/')} // Add logic to logout user
 
   return (
     <>
       <Container style={{position: 'relative', height: "100vh"}}>
         <Background />
-        <Navbar expand="lg" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-          <Container fluid>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="ms-auto">
-                <Button style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }}
-                  onClick={handleEvents}>Events</Button>
-                <Button style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }} 
-                  onClick={handleSettings}>Settings</Button>
-                <Button variant="outline-primary" onClick={handleLogout}>Logout</Button>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
+          <Navbar expand="lg" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+        <Container fluid>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}>Acceile</Nav.Link>
+              <Nav.Link onClick={handleEvents} style={{ cursor: 'pointer' }}>Événements</Nav.Link>
+              <Nav.Link onClick={handleAbout} style={{ cursor: 'pointer' }}>À propos de nous</Nav.Link>
+              <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}>Options</Nav.Link>
+              <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}>Déconnection</Nav.Link>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
 
         <Container>
           <Row className="justify-content-center">
@@ -50,7 +57,7 @@ const UserMainPage = () => {
                   className="mb-3" // Adds some space below the logo
                   style={{ width: '200px' }} // Adjust size as needed
                 />
-                <h1>Upcoming Events</h1>
+                <h1>Vos événements</h1>
               </div>
               <div className="mb-3">
                 {tags.map((tag, index) => (
