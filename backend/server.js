@@ -4,12 +4,12 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const authRouter = require('./routers/auth.route');
+const apiRouter = require('./routers/api.route');
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
 const { getAllMunicipalities } = require('./database/controllers/municipalityController');
 require('dotenv').config();
-const EventController = require('./database/controllers/eventsController.js');
 
 const app = express();
 
@@ -23,16 +23,6 @@ app.use((err, req, res, next) => {
 });
 
 connectToDatabase().then(() => {
-
-	app.post('/api-events-hook', async(req, res) => {
-		const eventInfo = req.body;
-
-		console.log('eventInfo: ', eventInfo);
-
-		// const event = await EventController.getOneEvent(eventInfo.id);
-
-	});
-
 	// FIXME Temp placement for frontend testing
 	app.get('/getAllTags', async(req, res) => {
 		const tags = await getAllTags();
@@ -54,7 +44,8 @@ connectToDatabase().then(() => {
 			res.status(400).send({status: false, message: 'No municipalities in database'});
 		}
 	});
-
+	
+	app.use('/api', apiRouter);
 	app.use('/auth', authRouter);
     
 	app.use(standardAuth);
