@@ -1,10 +1,13 @@
 import React from 'react';
-import { Navbar, Nav, Container, Row, Col, Card } from 'react-bootstrap';
+import { Navbar, Nav, Container, Row, Col, Button, Card } from 'react-bootstrap';
 import logo from '../logo.png'; // Make sure this path is correct
 import Background from '../components/Background';
 import { useNavigate } from 'react-router-dom';
 
-function UserEvent() {
+const UserMainPage = () => {
+  // Dummy data for tags, can be fetched from an API or state
+  const tags = ['Sport', 'Integration', 'French', 'Business'];
+
   // Placeholder content for events, to be replaced with actual event data
   const event = {
     tag: 'Sport',
@@ -29,7 +32,7 @@ function UserEvent() {
     <>
       <Container style={{position: 'relative', height: "100vh"}}>
         <Background />
-        <Navbar expand="lg" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+          <Navbar expand="lg" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
         <Container fluid>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -54,16 +57,23 @@ function UserEvent() {
                   className="mb-3" // Adds some space below the logo
                   style={{ width: '200px' }} // Adjust size as needed
                 />
-                <h1>Évènements à venir</h1>
+                <h1>Vos événements</h1>
+              </div>
+              <div className="mb-3">
+                {tags.map((tag, index) => (
+                  <Button key={index} style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }}  className="m-1">
+                    {tag}
+                  </Button>
+                ))}
               </div>
               <Card className="mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' }}>
-                <Card.Body>
-                  <Card.Subtitle className="mb-2 text-muted">{event.tag}</Card.Subtitle>
-                  <Card.Title>{event.title}</Card.Title>
-                  <Card.Subtitle className="mb-2 text-muted">{event.date}</Card.Subtitle>
-                  <Card.Text>{event.description}</Card.Text>
-                </Card.Body>
-              </Card>
+                              <Card.Body>
+                                  <Card.Subtitle className="mb-2 text-muted">{event.tag}</Card.Subtitle>
+                                  <Card.Title>{event.title}</Card.Title>
+                                  <Card.Subtitle className="mb-2 text-muted">{event.date}</Card.Subtitle>
+                                  <Card.Text>{event.description}</Card.Text>
+                              </Card.Body>
+                          </Card>
             </Col>
           </Row>
         </Container>
@@ -72,4 +82,4 @@ function UserEvent() {
   );
 };
 
-export default UserEvent
+export default UserMainPage;
