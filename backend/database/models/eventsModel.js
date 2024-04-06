@@ -19,25 +19,17 @@ const EventsSchema = new mongoose.Schema({
 	},
 	title: {
 		type: String,
-		require: false,
+		require: true,
 	},
 	description: {
 		type: String,
-		require: false,
+		require: true,
 	},
 	tags: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref:'Tags',
 		required: false
 	}],
-	venue: {
-		type: String,
-		require: false
-	},
-	address: {
-		type: String,
-		require: false
-	},
 	date: {
 		type: String,
 		require: false,
