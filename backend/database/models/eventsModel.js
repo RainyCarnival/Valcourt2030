@@ -17,6 +17,10 @@ const EventsSchema = new mongoose.Schema({
 		require: true,
 		unique: true
 	},
+	eventStatus: {
+		type: String,
+		require: true,
+	},
 	title: {
 		type: String,
 		require: false,
@@ -30,19 +34,15 @@ const EventsSchema = new mongoose.Schema({
 		ref:'Tags',
 		required: false
 	}],
-	venue: {
-		type: String,
-		require: false
-	},
-	address: {
-		type: String,
-		require: false
-	},
-	date: {
+	startDate: {
 		type: String,
 		require: false,
 	},
-	url: {
+	endDate: {
+		type: String,
+		require: false,
+	},
+	originUrl: {
 		type: String,
 		require: true
 	}

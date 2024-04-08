@@ -9,13 +9,12 @@ let mongoServer;
 
 const testEvent = {
 	eventId: '1234',
+	eventStatus: 'publish',
 	title: 'testing event',
 	description: 'this is a test event',
 	tags: [],
-	venue: 'this venue',
-	address: '123 test avenue',
-	date: 'tomorrow',
-	url: 'test.com'
+	startDate: 'tomorrow',
+	originUrl: 'test.com'
 };
 
 // Connect to database before tests.

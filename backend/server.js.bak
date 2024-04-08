@@ -4,9 +4,13 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const authRouter = require('./routers/auth.route');
-const apiRouter = require('./routers/api.route');
+<<<<<<< HEAD
 const municipalitiesRouter = require('./routers/municipalities.route')
 const tagsRouter = require('./routers/tags.route');
+
+=======
+const apiRouter = require('./routers/api.route');
+>>>>>>> main
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
@@ -36,17 +40,30 @@ connectToDatabase().then(() => {
 		}
 	});
 
-
+<<<<<<< HEAD
+=======
+	// FIXME Temp placement for frontend testing
+	app.get('/getAllMunicipalities', async(req, res) => {
+		const municipalities = await getAllMunicipalities();
+		if(municipalities.length > 0){
+			res.status(200).send({status: true, municipalities: municipalities}); 
+		}
+		else{
+			res.status(400).send({status: false, message: 'No municipalities in database'});
+		}
+	});
+	
 	app.use('/api', apiRouter);
+>>>>>>> main
 	app.use('/auth', authRouter);
 	app.use('/municipalities', municipalitiesRouter);
 	app.use('/tags', tagsRouter);
     
 	app.use(standardAuth);
     
-	app.get('/', (req, res) => {
+	app.get('/authTest', (req, res) => {
 		res.status(200).send({
-			message: 'Server is running.',
+			message: 'You are authorized.',
 			status: true
 		});
 	});

@@ -13,7 +13,7 @@ const { getAllEvents, updateOneEvent } = require('./eventsController');
  */
 async function getOneTag(tagToFind){
 	try {
-		const tag = await Tag.findOne({tag: tagToFind});
+		const tag = await Tag.findOne({tag: {$regex: tagToFind, $options: 'i'} });
 
 		if(!tag){
 			console.error('Tag not found.');
