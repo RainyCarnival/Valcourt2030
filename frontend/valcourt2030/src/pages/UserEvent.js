@@ -27,24 +27,24 @@ function UserEvent() {
 
   return (
     <>
+        <Navbar expand="lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' , width: '100%' }}>
+          <Container fluid>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="ms-auto">
+                <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}><strong>Accueil</strong></Nav.Link>
+                <Nav.Link onClick={handleEvents} style={{ cursor: 'pointer' }}><strong>Événements</strong></Nav.Link>
+                <Nav.Link onClick={handleAbout} style={{ cursor: 'pointer' }}><strong>À propos de nous</strong></Nav.Link>
+                <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}><strong>Options</strong></Nav.Link>
+                <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}><strong>Déconnexion</strong></Nav.Link>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
       <Container style={{position: 'relative', height: "100vh"}}>
         <Background />
-        <Navbar expand="lg" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-        <Container fluid>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="ms-auto">
-              <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}>Acceile</Nav.Link>
-              <Nav.Link onClick={handleEvents} style={{ cursor: 'pointer' }}>Événements</Nav.Link>
-              <Nav.Link onClick={handleAbout} style={{ cursor: 'pointer' }}>À propos de nous</Nav.Link>
-              <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}>Options</Nav.Link>
-              <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}>Déconnection</Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-
         <Container>
+          <p/>
           <Row className="justify-content-center">
             <Col md={8} lg={6}>
               <div className="text-center">
