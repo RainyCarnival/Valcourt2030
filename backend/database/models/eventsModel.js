@@ -17,24 +17,32 @@ const EventsSchema = new mongoose.Schema({
 		require: true,
 		unique: true
 	},
-	title: {
+	eventStatus: {
 		type: String,
 		require: true,
 	},
+	title: {
+		type: String,
+		require: false,
+	},
 	description: {
 		type: String,
-		require: true,
+		require: false,
 	},
 	tags: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref:'Tags',
 		required: false
 	}],
-	date: {
+	startDate: {
 		type: String,
 		require: false,
 	},
-	url: {
+	endDate: {
+		type: String,
+		require: false,
+	},
+	originUrl: {
 		type: String,
 		require: true
 	}

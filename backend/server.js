@@ -57,8 +57,8 @@ connectToDatabase().then(() => {
 		});
 	});
     
-	app.listen(process.env.PORT || 3000, () => {
-		console.log('Server listening on port 3000.');
+	app.listen(process.env.PORT || 3333, () => {
+		console.log(`Server listening on port ${process.env.PORT}.`);
 	});
 }).catch((error) => {
 	console.error('Error connecting to the database: ', error);

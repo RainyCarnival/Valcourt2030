@@ -1,107 +1,128 @@
 const express = require('express');
 const router = express.Router();
 const EventController = require('../database/controllers/eventsController.js');
+const { getOneTag } = require('../database/controllers/tagsController.js');
 
-// TODO
-router.post('/create-event', async(req, res) => {
+/* 
+	post_thumbnail to get the url for the featured image, otherwise the media is added into the description
+	tribe_venue can be used to get new venues created and reference them using the venue ID given in the trive_events
+	tribe_organizer can be used the same as the tribe_venue would be used but for organizers
+*/
+
+/**
+ * Creates a new event in the database.
+ * @param {Object} event - The event object containing event details.
+ * @returns {Object} An object with status and message properties.
+ */
+async function createEvent(event){
+	const result = await EventController.createOneEvent(event);
+
+	if (!result){
+		return {status: 400, message: {message: `Failed to create event: ${event.eventId}`}};
+	}
+
+	return {status: 201, message: {message: `Succesfully created event: ${event.eventId}`}};
+}
+
+/**
+ * Updates an existing event in the database.
+ * @param {Object} event - The event object containing event details.
+ * @returns {Object} An object with status and message properties.
+ */
+async function updateEvent(event){
+	const result = await EventController.updateOneEvent(event.eventId, event);
+
+	if(!result){
+		return {status: 400, message: {message: `Failed to update event: ${event.eventId}`}};
+	}
+
+	return {status: 200, message: {message: `Succesfully updated event: ${event.eventId}`}};
+}
+
+/**
+ * Deletes an event by its ID in the database.
+ * @param {string} eventId - The ID of the event to delete.
+ * @returns {Object} An object with status and message properties.
+ */
+async function deleteEvent(eventId){
+	const result = await EventController.deleteOneEvent(eventId);
+
+	if (!result){
+		return {status: 400, message: {message: `Failed to delete event: ${eventId}`}};
+	}
+
+	return {status: 200, message: {message: `Succesfully deleted event: ${eventId}`}};
+}
+
+/**
+ * Handles events based on their post status.
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ */
+router.put('/event-handler', async(req, res) => {
+	let result;
 	const body = req.body;
 
 	if (body.post.post_type !== 'tribe_events'){
-		res.status(400).send({message: `Bad post_type: ${body.post.post_type}`});
-
+		res.status(400).send({message: `Unsupported post type: ${body.post.post_type}`});
 		return;
 	}
 
 	const eventInfo = {
 		eventId: body.post_id,
+		eventStatus: body.post.post_status,
 		title: body.post.post_title,
 		description: body.post.post_content,
-		url: body.post_permalink
+		tags: [],
+		originUrl: body.post_permalink
 	};
 	
-	if (!eventInfo.eventId || !eventInfo.url) {
+	if (!eventInfo.eventId || !eventInfo.originUrl || !eventInfo.eventStatus) {
 		const missingInfo = Object.keys(eventInfo).filter(key => !eventInfo[key]);
-
-		res.status(400).send({message: `Missing required information: ${missingInfo}`});
-
-		return;
+		res.status(400).send({message: `Error missing required information: ${missingInfo}`});
 	}
 
 	if(body.post_meta._EventStartDateUTC){
-		eventInfo.date = body.post_meta._EventStartDateUTC[0];
+		eventInfo.startDate = body.post_meta._EventStartDateUTC[0];
 	}
 
+	if(body.post_meta._EventEndDateUTC){
+		eventInfo.endDate = body.post_meta._EventEndDateUTC[0];
+	}
+
+	// Grabs the name of each tag in post_tag then retrieves their ObejctId from the database so that it can be referenced in the event.
 	if(body.taxonomies.post_tag){
-		eventInfo.tags = Object.keys(body.taxonomies.post_tag);
+		const eventTags = Object.entries(body.taxonomies.post_tag).map(([key, value]) => value.name);
+
+
+		for (const tag of eventTags){
+			const tagId = await getOneTag(tag);
+
+			if (tagId){
+				eventInfo.tags.push(tagId);
+			}
+		}
 	}
 
-	console.log('eventInfo: ', eventInfo);
+	switch (body.post.post_status) {
+	case 'publish':
+		if (await EventController.getOneEvent(body.post_id)){
+			result = await updateEvent(eventInfo);
+		} else {
+			result = await createEvent(eventInfo);
+		}
+		
+		res.status(result.status).send(result.message);
+		return;
+	case 'trash':
+		result = await deleteEvent(eventInfo.eventId);
 
-	res.status(200).send(eventInfo);
-
-	const event = await EventController.getOneEvent(eventInfo.id);
-
-	if (!event) {
-		console.log(event);
+		res.status(result.status).send(result.message);
+		return;
+	default:
+		res.status(400).send({message: `Unsupported post status: ${body.post.post_status}`});
+		return;
 	}
-
-	
-	/*	EVENT INFO PATHING
-		eventId = post_id
-		title = post.post_title
-		description = post.post_content
-		tags = taxonomies.post_tag.getKeys()
-		venue = cant use, gives ID not venue name
-		address = cant use, does not provide info in sent data
-		date = post_meta._EventStartDateUTC
-		url = post_permalink
-	*/
-});
-
-// TODO
-router.patch('/update-event', async(req, res) => {
-	const body = req.body;
-
-	const eventInfo = {
-		eventId: body.post_id,
-		title: body.post.post_title,
-		description: body.post.post_content,
-		//tags: Object.keys(body.taxonomies.post_tag),
-		//date: body.post_meta._EventStartDateUTC,
-		url: body.post_permalink
-	};
-
-	console.log('eventInfo: ', eventInfo);
-	if(!eventInfo){
-		res.status(400).send('Missing information');
-	}
-	res.status(200).send(eventInfo);
-
-	// const event = await EventController.getOneEvent(eventInfo.id);
-
-});
-
-// TODO
-router.delete('/delete-event', async(req, res) => {
-	const body = req.body;
-
-	const eventInfo = {
-		eventId: body.post_id,
-		title: body.post.post_title,
-		description: body.post.post_content,
-		tags: Object.keys(body.taxonomies.post_tag),
-		date: body.post_meta._EventStartDateUTC,
-		url: body.post_permalink
-	};
-
-	console.log('eventInfo: ', eventInfo);
-	if(!eventInfo){
-		res.status(400).send('Missing information');
-	}
-	res.status(200).send(eventInfo);
-
-	// const event = await EventController.getOneEvent(eventInfo.id);
-
 });
 
 module.exports = router;
