@@ -6,7 +6,7 @@ const { getAllMunicipalities, createOneMunicipality } = require('../database/con
 
 const router = express.Router();
 
-router.get('/', adminAuth, (req, res) => {
+router.get('/', (req, res) => {
     res.status(200).send({
         message: 'Municipalities route is running.',
         status: true

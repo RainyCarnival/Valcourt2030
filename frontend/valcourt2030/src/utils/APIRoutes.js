@@ -1,5 +1,5 @@
 /* LOCAL ENVIRONMENT */
-export const host = "http://localhost:3000";
+export const host = "http://localhost:3333";
 export const loginRoute = `${host}/auth/login`;
 export const registerRoute = `${host}/auth/register`;
 export const allTagsRoute = `${host}/tags/getAllTags`;
