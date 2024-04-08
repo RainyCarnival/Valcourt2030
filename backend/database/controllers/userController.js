@@ -193,7 +193,10 @@ async function loginUser(email, password) {
 			throw new Error('Login Error: Password validation failure.');
 		}
 
-		return true;
+		return {
+			success: true,
+			user
+		};
 	}
 	catch(error) {
 		if(error.message.startsWith('Login Error')){

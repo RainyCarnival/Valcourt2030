@@ -19,10 +19,6 @@ router.get('/', (req, res) => {
 router.post('/register', async(req, res) => {
 	const body = req.body;
 
-	const verifiedEmail = validation.emailValidation(body.email);
-
-	const verifiedPassword = validation.passwordValidation(body.password);
-
 	if (!body.email) {
         res.status(400).send({
 			password: 'Email field is required.',
@@ -38,6 +34,10 @@ router.post('/register', async(req, res) => {
 		});
         return
     }
+
+	const verifiedEmail = validation.emailValidation(body.email);
+
+	const verifiedPassword = validation.passwordValidation(body.password);
 
 	if (!verifiedEmail.valid) {
 		res.status(400).send(
@@ -89,10 +89,10 @@ router.post('/register', async(req, res) => {
 	const userInfo = {
 		firstName: body.firstName,
 		lastName: body.lastName,
-		municipality: body.municipality,
 		email: body.email,
 		password: passwordHash,
-		interestedTags: body.interestedTags
+		municipality: body.municipality,
+		interestedTags: body.interestedTags,
 	}
 
 	if (await registerUser(userInfo)){
@@ -133,7 +133,10 @@ router.post('/login', async(req, res) => {
 	const user = login.user;
 
 	if (login.success) {
-		const token = jwt.sign({ userId: user._id }, process.env.SECRET, { expiresIn: '2h'});
+		const token = jwt.sign({ 
+			userId: user._id,
+			isAdmin: user.isAdmin
+		 }, process.env.SECRET, { expiresIn: '2h'});
 		
 		// TODO: If needed adjust success logic.
 		res.status(200);

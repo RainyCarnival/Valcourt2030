@@ -81,7 +81,9 @@ async function createOneTag(newTag){
 		}
 
 		session.commitTransaction();
-		return true;
+		return {
+			status: true
+		}
 	} catch (error) {
 		session.abortTransaction();
 
@@ -91,7 +93,10 @@ async function createOneTag(newTag){
 			console.error('Unexpected error creating tag: ', error);
 		}
 
-		return false;
+		return {
+			status: false,
+			message: error.message
+		}
 	} finally {
 		session.endSession();
 	}

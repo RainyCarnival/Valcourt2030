@@ -4,6 +4,9 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const authRouter = require('./routers/auth.route');
+const municipalitiesRouter = require('./routers/municipalities.route')
+const tagsRouter = require('./routers/tags.route');
+
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
@@ -33,18 +36,9 @@ connectToDatabase().then(() => {
 		}
 	});
 
-	// FIXME Temp placement for frontend testing
-	app.get('/getAllMunicipalities', async(req, res) => {
-		const municipalities = await getAllMunicipalities();
-		if(municipalities.length > 0){
-			res.status(200).send({status: true, municipalities: municipalities}); 
-		}
-		else{
-			res.status(400).send({status: false, message: 'No municipalities in database'});
-		}
-	});
-
 	app.use('/auth', authRouter);
+	app.use('/municipalities', municipalitiesRouter);
+	app.use('/tags', tagsRouter);
     
 	app.use(standardAuth);
     
