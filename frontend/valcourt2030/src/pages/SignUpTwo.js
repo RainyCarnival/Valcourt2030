@@ -27,7 +27,7 @@ export default function SignUpInterestPage() {
   }, [location.state, navigate])
 
   const getAllTags = async () => {
-    const { data } = await axios.get(allTagsRoute);
+    const { data } = await axios.get(allTagsRoute, {headers:{ "ngrok-skip-browser-warning": "69420"}});
 
     if (data.status){
       setTags(data.tags);
