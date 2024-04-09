@@ -36,11 +36,10 @@ const [municipalities, setMunicipalities] = useState([]);
 
   useEffect(() => {
     getAllMunicipalities()
-    console.log(municipalities)
   }, [])
 
   const getAllMunicipalities = async () => {
-    const { data } = await axios.get(allMunicipalitiesRoute);
+    const { data } = await axios.get(allMunicipalitiesRoute, {headers:{ "ngrok-skip-browser-warning": "69420"}});
     console.log(data)
     if (data.status){
       setMunicipalities(data.municipalities);
