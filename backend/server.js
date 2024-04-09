@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 
 const authRouter = require('./routers/auth.route');
+const apiRouter = require('./routers/api.route');
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
@@ -43,7 +44,8 @@ connectToDatabase().then(() => {
 			res.status(400).send({status: false, message: 'No municipalities in database'});
 		}
 	});
-
+	
+	app.use('/api', apiRouter);
 	app.use('/auth', authRouter);
     
 	app.use(standardAuth);
@@ -55,8 +57,8 @@ connectToDatabase().then(() => {
 		});
 	});
     
-	app.listen(process.env.PORT || 3000, () => {
-		console.log('Server listening on port 3000.');
+	app.listen(process.env.PORT || 3333, () => {
+		console.log(`Server listening on port ${process.env.PORT}.`);
 	});
 }).catch((error) => {
 	console.error('Error connecting to the database: ', error);
