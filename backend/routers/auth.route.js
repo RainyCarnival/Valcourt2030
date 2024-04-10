@@ -1,6 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 const validation = require('../utils/validation.utils');
+
 const { isEmailUnique, registerUser, loginUser } = require('../database/controllers/userController');
 
 const router = express.Router();
@@ -13,13 +16,8 @@ router.get('/', (req, res) => {
 	});
 });
 
-
 router.post('/register', async(req, res) => {
 	const body = req.body;
-
-	const verifiedEmail = validation.emailValidation(body.email);
-
-	const verifiedPassword = validation.passwordValidation(body.password);
 
 	if (!body.email) {
         res.status(400).send({
@@ -36,6 +34,10 @@ router.post('/register', async(req, res) => {
 		});
         return
     }
+
+	const verifiedEmail = validation.emailValidation(body.email);
+
+	const verifiedPassword = validation.passwordValidation(body.password);
 
 	if (!verifiedEmail.valid) {
 		res.status(400).send(
@@ -87,10 +89,10 @@ router.post('/register', async(req, res) => {
 	const userInfo = {
 		firstName: body.firstName,
 		lastName: body.lastName,
-		municipality: body.municipality,
 		email: body.email,
 		password: passwordHash,
-		interestedTags: body.interestedTags
+		municipality: body.municipality,
+		interestedTags: body.interestedTags,
 	}
 
 	if (await registerUser(userInfo)){
@@ -127,11 +129,21 @@ router.post('/login', async(req, res) => {
 		return;
 	}
 
-	if (await loginUser(body.email, body.password)){
+	const login = await loginUser(body.email, body.password)
+	const user = login.user;
+
+	if (login.success) {
+		const token = jwt.sign({ 
+			userId: user._id,
+			email: user.email,
+			isAdmin: user.isAdmin
+		 }, process.env.SECRET, { expiresIn: '2h'});
+		
 		// TODO: If needed adjust success logic.
 		res.status(200);
 		res.send({
 			message: 'Login successful.',
+			token,
 			status: true
 		});
 
