@@ -7,6 +7,8 @@ const authRouter = require('./routers/auth.route');
 const apiRouter = require('./routers/api.route');
 const municipalitiesRouter = require('./routers/municipalities.route')
 const tagsRouter = require('./routers/tags.route');
+const usersRouter = require('./routers/users.route')
+
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
 const { getAllTags } = require('./database/controllers/tagsController');
@@ -44,6 +46,8 @@ connectToDatabase().then(() => {
     
 	app.use(standardAuth);
     
+	app.use('/users', usersRouter);
+	
 	app.get('/', (req, res) => {
 		res.status(200).send({
 			message: 'Server is running.',

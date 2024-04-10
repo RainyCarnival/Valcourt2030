@@ -266,7 +266,9 @@ async function updateOneUser(email, userUpdateData) {
 		}
 
 		await session.commitTransaction();
-		return true;
+		return {
+			status: true
+		}
 
 	} catch (error) {
 		await session.abortTransaction();
@@ -279,7 +281,10 @@ async function updateOneUser(email, userUpdateData) {
 			console.error(`An unexpected error occured when updated user data: ${error}`);
 		}
 		
-		return false;
+		return {
+			message: error.message,
+			status: false
+		}
 	} finally {
 		session.endSession();
 	}
@@ -320,8 +325,9 @@ async function deleteOneUser(userEmail) {
 		}
 
 		session.commitTransaction();
-		return true;
-
+		return {
+			status: true
+		}
 	} catch (error) {
 		session.abortTransaction();
 		if(error.message.startsWith('Deletion Error')){
@@ -329,7 +335,10 @@ async function deleteOneUser(userEmail) {
 		} else {
 			console.error('Unexpected error occured deleting the user: ', error);
 		}
-		return false;
+		return {
+			message: error.message,
+			status: false
+		}
 
 	} finally {
 		session.endSession();
