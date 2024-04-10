@@ -1,8 +1,8 @@
 /* LOCAL ENVIRONMENT */
-export const host = "http://localhost:3333";
+// export const host = "http://localhost:3333";
 
 /* PRODUCTION ENVRIONMENT */
-// export const host = 'https://9cdd-45-88-190-47.ngrok-free.app';
+export const host = 'https://3c78-24-53-37-37.ngrok-free.app';
 
 export const loginRoute = `${host}/auth/login`;
 export const registerRoute = `${host}/auth/register`;
