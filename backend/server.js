@@ -7,7 +7,8 @@ const authRouter = require('./routers/auth.route');
 const apiRouter = require('./routers/api.route');
 const municipalitiesRouter = require('./routers/municipalities.route')
 const tagsRouter = require('./routers/tags.route');
-const usersRouter = require('./routers/users.route')
+const usersRouter = require('./routers/users.route');
+const eventRouter = require('./routers/events.route.js');
 
 const { standardAuth } = require('./middleware/auth.middleware');
 const { connectToDatabase } = require('./database/connection');
@@ -38,7 +39,7 @@ connectToDatabase().then(() => {
 		}
 	});
 
-
+	app.use('/events', eventRouter);
 	app.use('/api', apiRouter);
 	app.use('/auth', authRouter);
 	app.use('/municipalities', municipalitiesRouter);

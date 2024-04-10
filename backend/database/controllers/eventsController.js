@@ -14,12 +14,17 @@ async function getAllEvents(){
 			return false;
 		}
 
-		return events;
-
+		return {
+			status: true,
+			events: events
+		}
 	} catch (error) {
 		console.error(`An unexpected error occured retreiving the list of events: ${error}`);
 
-		return false;
+		return {
+			status: false,
+			message: error.message
+		}
 	}
 }
 
