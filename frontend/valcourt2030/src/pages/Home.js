@@ -7,29 +7,6 @@ import '../App.css';
 import axios from 'axios';
 import { allEventsRoute } from '../utils/APIRoutes';
 
-//Placeholder data for events
-const events = [
-  {
-    tag: 'Sport',
-    title: 'Sport Event Exemple',
-    date: 'XX/XX/XXXX',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.'
-  },
-  {
-    tag: 'Integration',
-    title: 'Integration Event Exemple',
-    date: 'XX/XX/XXXX',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.'
-  },
-  {
-    tag: 'Cuisine',
-    title: 'Cuisine Event Exemple',
-    date: 'XX/XX/XXXX',
-    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque.'
-  }
-  // Add more event objects here
-];
-
 const HomePage = () => {
 
     const navigate = useNavigate();
@@ -41,9 +18,8 @@ const HomePage = () => {
 
     const getAllEvents = async() => {
       const { data } = await axios.get(allEventsRoute, {headers:{"ngrok-skip-browser-warning": "69420"}});
-
       if(data.status){
-        setEvents(data.tags);
+        setEvents(data.events);
       }
     }
 
@@ -78,7 +54,7 @@ const HomePage = () => {
                     {events.map((event, index) => (
                         <Card key={index} className="mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' }}>
                             <Card.Body>
-                                <Card.Subtitle className="mb-2 text-muted">{event.tags}</Card.Subtitle>
+                                <Card.Subtitle className="mb-2 text-muted">{event.tags.map((tag, index) => tag.tag).join(', ')}</Card.Subtitle>
                                 <Card.Title>{event.title}</Card.Title>
                                 <Card.Subtitle className="mb-2 text-muted">{event.startDate}</Card.Subtitle>
                                 <Card.Text>{event.description}</Card.Text>
