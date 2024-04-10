@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Navbar } from 'react-bootstrap';
 import logo from '../logo.png';
 import Background from '../components/Background';
 import '../App.css';
+import axios from 'axios';
+import { allEventsRoute } from '../utils/APIRoutes';
 
 //Placeholder data for events
 const events = [
@@ -31,7 +33,20 @@ const events = [
 const HomePage = () => {
 
     const navigate = useNavigate();
-  
+    const [events, setEvents] = useState([]);
+
+    useEffect(() => {
+      getAllEvents()
+    }, [])
+
+    const getAllEvents = async() => {
+      const { data } = await axios.get(allEventsRoute, {headers:{"ngrok-skip-browser-warning": "69420"}});
+
+      if(data.status){
+        setEvents(data.tags);
+      }
+    }
+
     const handleLogin = () => {
       navigate('/Login');
     }
@@ -63,9 +78,9 @@ const HomePage = () => {
                     {events.map((event, index) => (
                         <Card key={index} className="mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' }}>
                             <Card.Body>
-                                <Card.Subtitle className="mb-2 text-muted">{event.tag}</Card.Subtitle>
+                                <Card.Subtitle className="mb-2 text-muted">{event.tags}</Card.Subtitle>
                                 <Card.Title>{event.title}</Card.Title>
-                                <Card.Subtitle className="mb-2 text-muted">{event.date}</Card.Subtitle>
+                                <Card.Subtitle className="mb-2 text-muted">{event.startDate}</Card.Subtitle>
                                 <Card.Text>{event.description}</Card.Text>
                             </Card.Body>
                         </Card>
@@ -73,8 +88,7 @@ const HomePage = () => {
                 </Col>
             </Row>
         </Container>
-    </Container>
-        
+    </Container> 
     );
   };
   
