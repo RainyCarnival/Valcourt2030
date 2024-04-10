@@ -1,15 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Form, Card, Navbar, Nav } from 'react-bootstrap';
 import logo from '../logo.png'; // Ensure this path is correct
 import Background from '../components/Background';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { allMunicipalitiesRoute } from '../utils/APIRoutes';
 
-const UserSettingsPage = () => {
+const UserSettingsPage = () => { 
+  const initialFormData = {
+    municipality: ''
+  };
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   // Assuming you have a list of tags and municipalities (this could also come from an API)
   const tags = ['Sport', 'Integration', 'News', 'Cooking', 'French', 'Art', 'Education', 'Business'];
-  const municipalities = ['Municipality 1', 'Municipality 2', 'Municipality 3', 'Other'];
+  const [municipalities, setMunicipalities] = useState([]);
+  const [formData, setFormData] = useState(initialFormData);
+ 
+  useEffect(() => {
+    getAllMunicipalities()
+    console.log(municipalities)
+  }, [])
+
+  const getAllMunicipalities = async () => {
+    const { data } = await axios.get(allMunicipalitiesRoute);
+    console.log(data)
+    if (data.status){
+      setMunicipalities(data.municipalities);
+    }
+    
+  };
 
   const handlePasswordChange = (event) => {
     // Add logic for changing password
@@ -75,11 +95,22 @@ const UserSettingsPage = () => {
               </div>
 
               <h2>Choix de municipalité</h2>
-              <Form.Select aria-label="Municipality select" className="mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' }}>
-                {municipalities.map((municipality, index) => (
-                  <option key={index} value={municipality}>{municipality}</option>
+              <Form.Group className="mb-3" controlId="formMunicipality">
+                <Form.Select value={formData.municipality || ''} onChange={e => setFormData({...formData, municipality: e.target.value})}
+                // TODO Make the municipality list dynamic pulling values from the database
+                >
+                <option value="" disabled>Choisir une municipalité</option>
+                {municipalities.map((municipality) => (
+                  <option
+                    key={municipality._id}
+                    id={`municipality-${municipality.municipality}`}
+                    value={municipality._id}
+                  >
+                    {municipality.municipality}
+                  </option>
                 ))}
               </Form.Select>
+            </Form.Group>
               <Button variant="primary"  style={{ backgroundColor: 'rgba(0, 152, 217, 0.5)', borderColor: 'rgba(0, 152, 217, 0.5)' }}>Sauvegarder</Button>
               <p/>
               <Card  className="mb-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: 'none', boxShadow:'0px 0px 10px rgba(0,0,0,0.1)' }}>
