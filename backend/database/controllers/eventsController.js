@@ -7,19 +7,24 @@ const Event = require('../models/eventsModel');
  */
 async function getAllEvents(){
 	try {
-		const events = await Event.find({});
+		const events = await Event.find({}).populate('tags');
 
 		if(events.length === 0){
 			console.error('No Events found.');
 			return false;
 		}
 
-		return events;
-
+		return {
+			status: true,
+			events: events
+		};
 	} catch (error) {
 		console.error(`An unexpected error occured retreiving the list of events: ${error}`);
 
-		return false;
+		return {
+			status: false,
+			message: error.message
+		};
 	}
 }
 

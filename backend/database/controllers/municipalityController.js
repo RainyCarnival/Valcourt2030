@@ -83,7 +83,9 @@ async function createOneMunicipality(newMunicipality){
 			throw new Error('Create Error: Failed to create municipality');
 		}
 
-		return true;
+		return {
+			status: true
+		};
 
 	} catch (error) {
 		if (error.message.startsWith('Create Error')) {
@@ -91,7 +93,10 @@ async function createOneMunicipality(newMunicipality){
 		} else {
 			console.error(`Unexpected error updating the municipality: ${error}`);
 		}
-		return false;
+		return {
+			status: false,
+			message: error.message
+		}
 	}
 }
 
