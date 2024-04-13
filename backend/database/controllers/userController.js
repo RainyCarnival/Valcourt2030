@@ -268,7 +268,7 @@ async function updateOneUser(email, userUpdateData) {
 		await session.commitTransaction();
 		return {
 			status: true
-		}
+		};
 
 	} catch (error) {
 		await session.abortTransaction();
@@ -284,7 +284,7 @@ async function updateOneUser(email, userUpdateData) {
 		return {
 			message: error.message,
 			status: false
-		}
+		};
 	} finally {
 		session.endSession();
 	}
@@ -327,7 +327,7 @@ async function deleteOneUser(userEmail) {
 		session.commitTransaction();
 		return {
 			status: true
-		}
+		};
 	} catch (error) {
 		session.abortTransaction();
 		if(error.message.startsWith('Deletion Error')){
@@ -338,7 +338,7 @@ async function deleteOneUser(userEmail) {
 		return {
 			message: error.message,
 			status: false
-		}
+		};
 
 	} finally {
 		session.endSession();

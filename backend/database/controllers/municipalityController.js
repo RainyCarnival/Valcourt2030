@@ -96,7 +96,7 @@ async function createOneMunicipality(newMunicipality){
 		return {
 			status: false,
 			message: error.message
-		}
+		};
 	}
 }
 
