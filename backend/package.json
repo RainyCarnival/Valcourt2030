@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "setup": "node setup-env.js",
     "start": "nodemon server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -20,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.2",
     "morgan": "^1.10.0",
-    "nodemon": "^3.0.3"
+    "nodemon": "^3.0.3",
+    "readline-sync": "^1.4.10"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
