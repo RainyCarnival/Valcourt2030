@@ -74,7 +74,8 @@ router.put('/event-handler', async(req, res) => {
 		title: body.post.post_title,
 		description: body.post.post_content,
 		tags: [],
-		originUrl: body.post_permalink
+		originUrl: body.post_permalink,
+		formUrl: body.post_meta._EventURL[0]
 	};
 	
 	if (!eventInfo.eventId || !eventInfo.originUrl || !eventInfo.eventStatus) {
