@@ -83,7 +83,7 @@ async function createOneTag(newTag){
 		session.commitTransaction();
 		return {
 			status: true
-		}
+		};
 	} catch (error) {
 		session.abortTransaction();
 
@@ -96,7 +96,7 @@ async function createOneTag(newTag){
 		return {
 			status: false,
 			message: error.message
-		}
+		};
 	} finally {
 		session.endSession();
 	}

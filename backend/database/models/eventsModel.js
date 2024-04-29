@@ -45,6 +45,10 @@ const EventsSchema = new mongoose.Schema({
 	originUrl: {
 		type: String,
 		require: true
+	},
+	formUrl: {
+		type: String,
+		require: false
 	}
 });
 
