@@ -54,7 +54,6 @@ export default function LoginPage() {
   
         if (data.status) {
           const decodedToken = jwtDecode(data.token);
-          console.log('decodedToken: ', decodedToken);
 
           if(decodedToken.isAdmin){
             navigate('/adminMain');
