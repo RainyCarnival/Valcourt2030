@@ -32,10 +32,10 @@ function UserEvent() {
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="ms-auto">
-                <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}><strong>Accueil</strong></Nav.Link>
+                <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}><strong>Mes Activités</strong></Nav.Link>
                 <Nav.Link onClick={handleEvents} style={{ cursor: 'pointer' }}><strong>Événements</strong></Nav.Link>
                 <Nav.Link onClick={handleAbout} style={{ cursor: 'pointer' }}><strong>À propos de nous</strong></Nav.Link>
-                <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}><strong>Options</strong></Nav.Link>
+                <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}><strong>Mon Profile</strong></Nav.Link>
                 <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}><strong>Déconnexion</strong></Nav.Link>
               </Nav>
             </Navbar.Collapse>

@@ -4,7 +4,7 @@ import logo from '../logo.png'; // Make sure this path is correct
 import Background from '../components/Background';
 import { useNavigate } from 'react-router-dom';
 
-const UserMainPage = () => {
+const AdminMainPage = () => {
   // Dummy data for tags, can be fetched from an API or state
   const tags = ['Sport', 'Integration', 'French', 'Business'];
 
@@ -18,13 +18,11 @@ const UserMainPage = () => {
 
   const navigate = useNavigate();
 
-  const handleHome = () => {navigate('/usermain')}
+  const handleHome = () => {navigate('/adminMain')}
 
-  const handleEvents = () => {navigate('/userevent')} // Add logic to navigate to events page
+  const handleOptiont = () => {navigate('/adminOption')} // Add logic to navigate to about page
 
-  const handleAbout = () => {navigate('/userAbout')} // Add logic to navigate to about page
-
-  const handleSettings = () => {navigate('/usersetting')} // Add logic to navigate to settings page
+  const handleStatistic = () => {navigate('/adminStatistic')} // Add logic to navigate to settings page
 
   const handleLogout = () => {navigate('/')} // Add logic to logout user
 
@@ -36,9 +34,8 @@ const UserMainPage = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <Nav.Link onClick={handleHome} style={{ cursor: 'pointer' }}><strong>Mes Activités</strong></Nav.Link>
-              <Nav.Link onClick={handleEvents} style={{ cursor: 'pointer' }}><strong>Événements</strong></Nav.Link>
-              <Nav.Link onClick={handleAbout} style={{ cursor: 'pointer' }}><strong>À propos de nous</strong></Nav.Link>
-              <Nav.Link onClick={handleSettings} style={{ cursor: 'pointer' }}><strong>Mon Profile</strong></Nav.Link>
+              <Nav.Link onClick={handleOptiont} style={{ cursor: 'pointer' }}><strong>Options</strong></Nav.Link>
+              <Nav.Link onClick={handleStatistic} style={{ cursor: 'pointer' }}><strong>Statistiques</strong></Nav.Link>
               <Nav.Link onClick={handleLogout} style={{ cursor: 'pointer' }}><strong>Déconnexion</strong></Nav.Link>
             </Nav>
           </Navbar.Collapse>
@@ -82,4 +79,4 @@ const UserMainPage = () => {
   );
 };
 
-export default UserMainPage;
+export default AdminMainPage;

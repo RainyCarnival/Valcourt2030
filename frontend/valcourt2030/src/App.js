@@ -8,6 +8,9 @@ import Home from './pages/Home';
 import UserMain from './pages/UserMainPage';
 import UserSetting from './pages/UserSettings';
 import UserAbout from './pages/About';
+import AdminMain from './pages/AdminMainPage';
+import AdminOption from './pages/AdminOptionPage';
+import AdminStatistic from './pages/AdminStatisticPage';
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
         <Route path="/userMain" element={<UserMain />} />
         <Route path="/userSetting" element={<UserSetting />} /> 
         <Route path="/userAbout" element={<UserAbout />} />
+        <Route path="/adminMain" element={<AdminMain />} />
+        <Route path="/adminOption" element={<AdminOption />} />
+        <Route path="/adminStatistic" element={<AdminStatistic />} />
       </Routes>
     </BrowserRouter>
   );
