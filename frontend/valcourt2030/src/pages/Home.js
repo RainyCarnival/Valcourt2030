@@ -57,7 +57,15 @@ const HomePage = () => {
                                 <Card.Subtitle className="mb-2 text-muted">{event.tags.map((tag, index) => tag.tag).join(', ')}</Card.Subtitle>
                                 <Card.Title>{event.title}</Card.Title>
                                 <Card.Subtitle className="mb-2 text-muted">{event.startDate}</Card.Subtitle>
-                                <Card.Text>{event.description}</Card.Text>
+                                <Card.Text>
+                                    {event.formUrl && (
+                                        <>
+                                        <a href={event.formUrl} target="_blank" rel="noreferrer">Cliquez ici pour réserver vos places!</a>
+                                        <br/><br/>
+                                        </>
+                                    )}
+                                    {event.description}
+                                </Card.Text>
                             </Card.Body>
                         </Card>
                     ))}
