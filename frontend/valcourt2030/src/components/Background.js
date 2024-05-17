@@ -9,7 +9,7 @@ const Background = () => {
         top: '-6rem',
         right: '11rem',
         height: '50rem',
-        width: '50rem',
+        width: '100%',
         borderRadius: '50%',
         filter: 'blur(160px)',
         zIndex: -10
@@ -20,7 +20,7 @@ const Background = () => {
         top: '0rem',
         left: '-1rem',
         height: '50rem',
-        width: '50rem',
+        width: '100%',
         borderRadius: '50%',
         filter: 'blur(160px)',
         zIndex: -10
