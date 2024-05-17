@@ -225,7 +225,7 @@ router.post('/login', async(req, res) => {
 
 async function sendConfirmationEmail(email, token) {
 	let transporter = nodemailer.createTransport({
-		host: 'smtp-mail.outlook.com', // SMTP server hostname
+		host: 'smtp.gmail.com', // SMTP server hostname
 		port: 587, // SMTP port (587 for TLS)
 		secure: false, // true for 465, false for other ports
 		auth: {
@@ -238,7 +238,7 @@ async function sendConfirmationEmail(email, token) {
 		from: `${process.env.EMAIL_USER}`,
 		to: email,
 		subject: 'Confirmation de compte',
-		html: `<p>Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : <a href="http://localhost:3333/auth/confirm-email?token=${token}">Confirmer l'email</a></p>`
+		html: `<p>Veuillez confirmer votre adresse e-mail en cliquant sur le lien suivant : <a href="${process.env.HOST}/auth/confirm-email?token=${token}">Confirmer l'email</a></p>`
 	});
 
 	console.log('Email de confirmation envoyé :', info.messageId);
