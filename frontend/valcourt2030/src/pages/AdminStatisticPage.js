@@ -59,7 +59,7 @@ const AdminStatisticPage = () => {
               </div>
               <div className="mb-3 text-center">
                 <h3>Statistiques</h3>
-                <Table striped bordered hover>
+                <Table striped bordered hover style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}>
                   <thead>
                     <tr>
                       <th>Champ</th>
