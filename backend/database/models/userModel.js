@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
  * @property {mongoose.Schema.Types.ObjectId[]} interestedTags - A list of interested tags of the user (ref: Tags).
  * @property {boolean} isAdmin - Indicates if the user is an admin (default: false).
  * @property {boolean} isValidated - Indicates if the user is validated (default: false).
+ * @property {boolean} confirmationToken - Indicates if the user is validated (default: false).
  */
 const UserSchema = new mongoose.Schema({
 	firstName: {
@@ -50,6 +51,10 @@ const UserSchema = new mongoose.Schema({
 	isValidated: {
 		type:Boolean,
 		default: false,
+		required: false
+	},
+	confirmationToken: {
+		type: String,
 		required: false
 	}
 });
