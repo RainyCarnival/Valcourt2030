@@ -6,6 +6,7 @@ import logo from '../logo.png';
 import Background from '../components/Background';
 import axios from 'axios';
 import { loginRoute } from '../utils/APIRoutes';
+import { jwtDecode } from 'jwt-decode';
 
 export default function LoginPage() {
   const location = useLocation();
@@ -52,7 +53,14 @@ export default function LoginPage() {
         });
   
         if (data.status) {
-          navigate('/userEvent');
+          const decodedToken = jwtDecode(data.token);
+          console.log('decodedToken: ', decodedToken);
+
+          if(decodedToken.isAdmin){
+            navigate('/adminMain');
+          } else {
+            navigate('/userEvent');
+          }
         }
 
       } catch (error) {
