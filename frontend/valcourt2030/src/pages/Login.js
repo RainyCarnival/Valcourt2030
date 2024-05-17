@@ -61,17 +61,17 @@ export default function LoginPage() {
 
           if (status === 401) {
             setMessage(null);
-            setError('Identifiants de connexion incorrects. Veuillez vérifier votre adresse courriel et votre mot de passe.');
+            setError('Identifiants de connexion incorrects. Veuillez v\u00E9rifier votre adresse courriel et votre mot de passe.');
           } else if (status === 400) {
             setMessage(null);
             setError('Courriel et mot de passe est requis.');
           } else {
             setMessage(null);
-            setError(`Erreur inattendue lors de la connexion. Veuillez réessayer plus tard.`);
+            setError(`Erreur inattendue lors de la connexion. Veuillez r\u00E9essayer plus tard.`);
           }
         } else {
           setMessage(null);
-          setError(`* Une erreur interne du serveur s'est produite. \nVeuillez réessayer plus tard.`);
+          setError(`* Une erreur interne du serveur s'est produite. \nVeuillez r\u00E9essayer plus tard.`);
         }
       }
     }

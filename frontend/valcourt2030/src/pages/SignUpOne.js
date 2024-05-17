@@ -155,7 +155,6 @@ const [municipalities, setMunicipalities] = useState([]);
 
             <Form.Group className="mb-3" controlId="formMunicipality">
             <Form.Select value={formData.municipality || ''} onChange={e => setFormData({...formData, municipality: e.target.value})}
-            // TODO Make the municipality list dynamic pulling values from the database
             >
                 <option value="" disabled>Choisir une municipalité</option>
                 {municipalities.map((municipality) => (
@@ -184,6 +183,7 @@ const [municipalities, setMunicipalities] = useState([]);
 
             <Form.Group className="mb-3" controlId="formBasicCheckbox">
               <Form.Check type="checkbox" label="*Conditions de services" required checked={formData.terms} onChange={e => setFormData({...formData, terms: e.target.checked})}/>
+              <Form.Text>Pour plus d’informations sur notre politique de confidentialité, <a href='https://valcourt2030.org/politique-de-confidentialite/' target="_blank" rel="noreferrer">cliquez ici.</a></Form.Text>
             </Form.Group>
             {error && (
               <div className="alert alert-danger my-3 py-2" role="alert" style={{ fontSize: 'small' }}>
