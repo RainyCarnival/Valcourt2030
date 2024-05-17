@@ -127,7 +127,8 @@ async function registerUser(userInfo, isAdmin = false, isValidated = false) {
 			municipality: userInfo.municipality,
 			interestedTags: userInfo.interestedTags,
 			isAdmin: isAdmin,
-			isValidated: isValidated
+			isValidated: isValidated,
+			confirmationToken: userInfo.confirmationToken
 		});
 
 		if (!newUser){
