@@ -61,11 +61,16 @@ async function deleteEvent(eventId){
  */
 router.put('/event-handler', async(req, res) => {
 	let result;
+	let formURL = '';
 	const body = req.body;
 
 	if (body.post.post_type !== 'tribe_events'){
 		res.status(400).send({message: `Unsupported post type: ${body.post.post_type}`});
 		return;
+	}
+
+	if(body.post_meta._EventURL.length > 0){
+		formURL = body.post_meta._EventURL[0];
 	}
 
 	const eventInfo = {
@@ -75,7 +80,7 @@ router.put('/event-handler', async(req, res) => {
 		description: body.post.post_content,
 		tags: [],
 		originUrl: body.post_permalink,
-		formUrl: body.post_meta._EventURL[0]
+		formUrl: formURL
 	};
 	
 	if (!eventInfo.eventId || !eventInfo.originUrl || !eventInfo.eventStatus) {

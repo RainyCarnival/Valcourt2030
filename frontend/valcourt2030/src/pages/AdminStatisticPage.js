@@ -16,7 +16,7 @@ const AdminStatisticPage = () => {
   const handleLogout = () => { navigate('/') }
 
   const statistics = [
-    { field: 'User Number', number: 123 },
+    { field: 'Users', number: 123 },
     { field: 'Sport', number: 34 },
     { field: 'Integration', number: 73 },
     { field: 'Cooking', number: 21 },
@@ -63,7 +63,7 @@ const AdminStatisticPage = () => {
                   <thead>
                     <tr>
                       <th>Champ</th>
-                      <th>Numbre</th>
+                      <th>Total</th>
                     </tr>
                   </thead>
                   <tbody>
